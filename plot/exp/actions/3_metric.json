@@ -1,0 +1,200 @@
+[
+    {
+        "Number of Agents": 32,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "59.86 ± 1.01",
+        "SoC": "1057.42 ± 13.42",
+        "makespan": "60.86 ± 1.07",
+        "avg_agents_density": "0.05 ± 0.00",
+        "Runtime (seconds)": "5.15 ± 0.22"
+    },
+    {
+        "Number of Agents": 32,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "58.45 ± 0.94",
+        "SoC": "1042.55 ± 13.71",
+        "makespan": "59.45 ± 0.94",
+        "avg_agents_density": "0.05 ± 0.00",
+        "Runtime (seconds)": "4.56 ± 0.23"
+    },
+    {
+        "Number of Agents": 32,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "59.43 ± 1.04",
+        "SoC": "1048.26 ± 15.19",
+        "makespan": "60.43 ± 1.05",
+        "avg_agents_density": "0.05 ± 0.00",
+        "Runtime (seconds)": "5.17 ± 0.23"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "66.42 ± 0.93",
+        "SoC": "2273.71 ± 23.23",
+        "makespan": "67.42 ± 0.91",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "13.44 ± 0.17"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "65.25 ± 1.00",
+        "SoC": "2231.62 ± 23.12",
+        "makespan": "66.25 ± 1.04",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "12.42 ± 0.17"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "65.96 ± 0.98",
+        "SoC": "2233.83 ± 22.44",
+        "makespan": "66.96 ± 0.97",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "13.21 ± 0.18"
+    },
+    {
+        "Number of Agents": 96,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "74.91 ± 1.36",
+        "SoC": "3817.83 ± 43.51",
+        "makespan": "75.91 ± 1.35",
+        "avg_agents_density": "0.12 ± 0.00",
+        "Runtime (seconds)": "22.34 ± 0.38"
+    },
+    {
+        "Number of Agents": 96,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "72.27 ± 1.28",
+        "SoC": "3661.79 ± 40.27",
+        "makespan": "73.27 ± 1.35",
+        "avg_agents_density": "0.12 ± 0.00",
+        "Runtime (seconds)": "20.20 ± 0.33"
+    },
+    {
+        "Number of Agents": 96,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "72.70 ± 1.19",
+        "SoC": "3696.33 ± 40.96",
+        "makespan": "73.70 ± 1.16",
+        "avg_agents_density": "0.11 ± 0.00",
+        "Runtime (seconds)": "21.74 ± 0.34"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "0.99 ± 0.01",
+        "CSR": "0.94 ± 0.04",
+        "ep_length": "91.03 ± 2.55",
+        "SoC": "5870.62 ± 105.17",
+        "makespan": "92.03 ± 2.57",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "36.25 ± 0.92"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "80.87 ± 1.48",
+        "SoC": "5415.11 ± 70.03",
+        "makespan": "81.87 ± 1.48",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "30.00 ± 0.49"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "0.99 ± 0.01",
+        "ep_length": "83.51 ± 1.59",
+        "SoC": "5543.94 ± 81.01",
+        "makespan": "84.51 ± 1.66",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "33.36 ± 0.60"
+    },
+    {
+        "Number of Agents": 160,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "0.95 ± 0.01",
+        "CSR": "0.48 ± 0.09",
+        "ep_length": "116.34 ± 2.27",
+        "SoC": "9139.59 ± 182.28",
+        "makespan": "117.34 ± 2.29",
+        "avg_agents_density": "0.19 ± 0.00",
+        "Runtime (seconds)": "57.64 ± 1.20"
+    },
+    {
+        "Number of Agents": 160,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "0.99 ± 0.00",
+        "CSR": "0.88 ± 0.06",
+        "ep_length": "100.12 ± 2.59",
+        "SoC": "7955.68 ± 158.14",
+        "makespan": "101.12 ± 2.58",
+        "avg_agents_density": "0.18 ± 0.00",
+        "Runtime (seconds)": "46.41 ± 1.13"
+    },
+    {
+        "Number of Agents": 160,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "0.97 ± 0.01",
+        "CSR": "0.77 ± 0.07",
+        "ep_length": "104.19 ± 2.75",
+        "SoC": "8260.23 ± 191.34",
+        "makespan": "105.19 ± 2.91",
+        "avg_agents_density": "0.19 ± 0.00",
+        "Runtime (seconds)": "52.53 ± 1.34"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "MA-MAPF-GPT-2actions",
+        "ISR": "0.83 ± 0.02",
+        "CSR": "0.09 ± 0.05",
+        "ep_length": "125.85 ± 0.85",
+        "SoC": "13190.79 ± 230.81",
+        "makespan": "126.85 ± 0.86",
+        "avg_agents_density": "0.24 ± 0.00",
+        "Runtime (seconds)": "75.74 ± 0.68"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "MA-MAPF-GPT-4actions",
+        "ISR": "0.94 ± 0.01",
+        "CSR": "0.38 ± 0.09",
+        "ep_length": "120.47 ± 1.88",
+        "SoC": "11680.89 ± 223.63",
+        "makespan": "121.47 ± 1.87",
+        "avg_agents_density": "0.23 ± 0.00",
+        "Runtime (seconds)": "67.95 ± 1.10"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "MA-MAPF-GPT-5actions",
+        "ISR": "0.89 ± 0.02",
+        "CSR": "0.32 ± 0.08",
+        "ep_length": "122.23 ± 1.70",
+        "SoC": "12107.95 ± 243.31",
+        "makespan": "123.23 ± 1.70",
+        "avg_agents_density": "0.23 ± 0.00",
+        "Runtime (seconds)": "73.54 ± 1.04"
+    }
+]

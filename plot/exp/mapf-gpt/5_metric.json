@@ -1,0 +1,68 @@
+[
+    {
+        "Number of Agents": 2,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "6.99 ± 1.22",
+        "SoC": "13.46 ± 2.29",
+        "makespan": "7.99 ± 1.24",
+        "avg_agents_density": "0.02 ± 0.00",
+        "Runtime (seconds)": "0.04 ± 0.01"
+    },
+    {
+        "Number of Agents": 2,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "0.99 ± 0.01",
+        "ep_length": "6.88 ± 1.61",
+        "SoC": "13.36 ± 3.23",
+        "makespan": "7.88 ± 1.60",
+        "avg_agents_density": "0.02 ± 0.00",
+        "Runtime (seconds)": "0.11 ± 0.03"
+    },
+    {
+        "Number of Agents": 3,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "0.94 ± 0.04",
+        "CSR": "0.93 ± 0.04",
+        "ep_length": "21.18 ± 5.12",
+        "SoC": "59.12 ± 15.31",
+        "makespan": "22.18 ± 5.34",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.12 ± 0.03"
+    },
+    {
+        "Number of Agents": 3,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "0.96 ± 0.03",
+        "CSR": "0.95 ± 0.03",
+        "ep_length": "17.78 ± 4.49",
+        "SoC": "49.07 ± 12.75",
+        "makespan": "18.78 ± 4.64",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.43 ± 0.11"
+    },
+    {
+        "Number of Agents": 4,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "0.86 ± 0.05",
+        "CSR": "0.82 ± 0.06",
+        "ep_length": "38.83 ± 6.97",
+        "SoC": "138.99 ± 26.74",
+        "makespan": "39.83 ± 7.18",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "0.24 ± 0.04"
+    },
+    {
+        "Number of Agents": 4,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "0.92 ± 0.04",
+        "CSR": "0.89 ± 0.05",
+        "ep_length": "29.34 ± 6.16",
+        "SoC": "104.43 ± 22.25",
+        "makespan": "30.34 ± 5.60",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "0.84 ± 0.16"
+    }
+]

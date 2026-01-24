@@ -1,0 +1,35 @@
+[
+    {
+        "Number of Agents": 2,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "6.78 ± 1.27",
+        "SoC": "13.15 ± 2.32",
+        "makespan": "7.78 ± 1.21",
+        "avg_agents_density": "0.02 ± 0.00",
+        "Runtime (seconds)": "0.06 ± 0.01"
+    },
+    {
+        "Number of Agents": 3,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.96 ± 0.03",
+        "CSR": "0.96 ± 0.03",
+        "ep_length": "15.37 ± 4.25",
+        "SoC": "43.05 ± 11.82",
+        "makespan": "16.37 ± 4.03",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.17 ± 0.05"
+    },
+    {
+        "Number of Agents": 4,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.92 ± 0.04",
+        "CSR": "0.91 ± 0.04",
+        "ep_length": "28.86 ± 6.04",
+        "SoC": "104.44 ± 22.91",
+        "makespan": "29.86 ± 5.86",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "0.47 ± 0.09"
+    }
+]

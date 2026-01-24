@@ -1,0 +1,1 @@
+[{"metrics": {"ISR": 1.0, "CSR": 1.0, "ep_length": 23, "SoC": 114, "makespan": 24, "avg_agents_density": 0.04661570244440196, "runtime": 0.11501798200060875}, "env_grid_search": {}, "algorithm": "CBS"}]

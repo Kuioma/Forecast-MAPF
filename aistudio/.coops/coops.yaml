@@ -1,0 +1,7 @@
+CpuCore: 16
+GpuCard: 1
+GpuKinds: ['4090']
+Image: harbor.cowarobot.cn/aistudio/mapf-gpt:0
+Mode: custom
+ScriptPath: aistudio.sh
+Worker: 1

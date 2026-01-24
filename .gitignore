@@ -1,0 +1,30 @@
+# Python
+# =================================================
+
+# 虚拟环境
+/venv/
+/env/
+/.venv/
+/ENV/
+/virtualenv/
+.vscode/
+
+# 字节码和缓存文件
+__pycache__/
+
+
+# 单元测试和覆盖率报告
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+.devcontainer/
+
+# 打包和分发
+*.egg-info/
+/dist/
+/build/
+*.egg
+
+# 权重
+weights/

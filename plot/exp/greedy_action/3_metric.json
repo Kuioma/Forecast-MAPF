@@ -1,0 +1,68 @@
+[
+    {
+        "Number of Agents": 32,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "60.30 ± 0.99",
+        "SoC": "1072.54 ± 14.35",
+        "makespan": "61.30 ± 1.04",
+        "avg_agents_density": "0.05 ± 0.00",
+        "Runtime (seconds)": "4.68 ± 0.21"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "67.60 ± 0.98",
+        "SoC": "2324.91 ± 25.87",
+        "makespan": "68.60 ± 0.92",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "11.95 ± 0.14"
+    },
+    {
+        "Number of Agents": 96,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "76.12 ± 1.38",
+        "SoC": "3852.70 ± 47.74",
+        "makespan": "77.12 ± 1.43",
+        "avg_agents_density": "0.12 ± 0.00",
+        "Runtime (seconds)": "19.97 ± 0.33"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "0.97 ± 0.03",
+        "ep_length": "91.25 ± 2.52",
+        "SoC": "5898.90 ± 92.82",
+        "makespan": "92.25 ± 2.44",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "31.74 ± 0.73"
+    },
+    {
+        "Number of Agents": 160,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "0.95 ± 0.01",
+        "CSR": "0.49 ± 0.09",
+        "ep_length": "116.28 ± 2.38",
+        "SoC": "9086.51 ± 183.47",
+        "makespan": "117.28 ± 2.32",
+        "avg_agents_density": "0.19 ± 0.00",
+        "Runtime (seconds)": "50.69 ± 1.15"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "0.84 ± 0.02",
+        "CSR": "0.10 ± 0.05",
+        "ep_length": "125.45 ± 0.94",
+        "SoC": "13071.08 ± 265.36",
+        "makespan": "126.45 ± 0.98",
+        "avg_agents_density": "0.23 ± 0.00",
+        "Runtime (seconds)": "68.65 ± 0.75"
+    }
+]

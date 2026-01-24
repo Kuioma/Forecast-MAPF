@@ -1,0 +1,68 @@
+[
+    {
+        "Number of Agents": 8,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "25.98 ± 1.04",
+        "SoC": "124.97 ± 4.66",
+        "makespan": "26.98 ± 0.97",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.55 ± 0.05"
+    },
+    {
+        "Number of Agents": 16,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "30.70 ± 1.28",
+        "SoC": "270.21 ± 9.47",
+        "makespan": "31.70 ± 1.20",
+        "avg_agents_density": "0.06 ± 0.00",
+        "Runtime (seconds)": "1.49 ± 0.08"
+    },
+    {
+        "Number of Agents": 24,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "33.65 ± 1.30",
+        "SoC": "436.18 ± 15.23",
+        "makespan": "34.65 ± 1.24",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "2.67 ± 0.09"
+    },
+    {
+        "Number of Agents": 32,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "38.48 ± 1.79",
+        "SoC": "655.45 ± 34.88",
+        "makespan": "39.48 ± 1.82",
+        "avg_agents_density": "0.11 ± 0.00",
+        "Runtime (seconds)": "4.07 ± 0.17"
+    },
+    {
+        "Number of Agents": 48,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "0.98 ± 0.02",
+        "ep_length": "48.62 ± 3.03",
+        "SoC": "1234.88 ± 90.53",
+        "makespan": "49.62 ± 3.19",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "7.30 ± 0.44"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.98 ± 0.01",
+        "CSR": "0.91 ± 0.05",
+        "ep_length": "62.29 ± 4.77",
+        "SoC": "2212.84 ± 188.27",
+        "makespan": "63.29 ± 4.24",
+        "avg_agents_density": "0.20 ± 0.01",
+        "Runtime (seconds)": "12.35 ± 0.88"
+    }
+]

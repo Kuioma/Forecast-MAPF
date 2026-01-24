@@ -1,0 +1,16 @@
+[
+    {
+        "Algorithm": "MA-MAPF-GPT-3actions",
+        "Number of Agents": 48,
+        "CSR": 0.9782608695652174,
+        "ISR": 0.998641304347826,
+        "SoC": 1318.0434782608695
+    },
+    {
+        "Algorithm": "MA-MAPF-GPT-3actions_2",
+        "Number of Agents": 48,
+        "CSR": 1.0,
+        "ISR": 1.0,
+        "SoC": 1323.108695652174
+    }
+]

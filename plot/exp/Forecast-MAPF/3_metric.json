@@ -1,0 +1,68 @@
+[
+    {
+        "Number of Agents": 32,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "58.88 ± 1.00",
+        "SoC": "1048.95 ± 14.06",
+        "makespan": "59.88 ± 1.01",
+        "avg_agents_density": "0.05 ± 0.00",
+        "Runtime (seconds)": "5.16 ± 0.25"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "65.88 ± 1.05",
+        "SoC": "2255.47 ± 21.81",
+        "makespan": "66.88 ± 1.00",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "13.20 ± 0.19"
+    },
+    {
+        "Number of Agents": 96,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "72.66 ± 1.00",
+        "SoC": "3724.50 ± 41.76",
+        "makespan": "73.66 ± 1.05",
+        "avg_agents_density": "0.12 ± 0.00",
+        "Runtime (seconds)": "21.80 ± 0.29"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "83.93 ± 1.81",
+        "SoC": "5620.35 ± 77.42",
+        "makespan": "84.93 ± 1.93",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "33.30 ± 0.68"
+    },
+    {
+        "Number of Agents": 160,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.99 ± 0.00",
+        "CSR": "0.93 ± 0.04",
+        "ep_length": "100.60 ± 2.49",
+        "SoC": "8204.73 ± 148.67",
+        "makespan": "101.60 ± 2.47",
+        "avg_agents_density": "0.19 ± 0.00",
+        "Runtime (seconds)": "50.74 ± 1.19"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.93 ± 0.02",
+        "CSR": "0.38 ± 0.09",
+        "ep_length": "120.69 ± 1.78",
+        "SoC": "12113.54 ± 226.43",
+        "makespan": "121.69 ± 1.75",
+        "avg_agents_density": "0.23 ± 0.00",
+        "Runtime (seconds)": "73.98 ± 1.21"
+    }
+]

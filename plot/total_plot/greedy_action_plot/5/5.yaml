@@ -1,0 +1,175 @@
+environment:
+  name: Environment
+  with_animation: False
+  on_target: nothing
+  max_episode_steps: 128
+  observation_type: MAPF
+  collision_system: soft
+  seed:
+    grid_search: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  num_agents:
+    grid_search: [2, 3, 4]
+  map_name:
+    grid_search:
+      [
+        puzzle-00,
+        puzzle-01,
+        puzzle-02,
+        puzzle-03,
+        puzzle-04,
+        puzzle-05,
+        puzzle-06,
+        puzzle-07,
+        puzzle-08,
+        puzzle-09,
+        puzzle-10,
+        puzzle-11,
+        puzzle-12,
+        puzzle-13,
+        puzzle-14,
+        puzzle-15,
+      ]
+
+algorithms:
+  # MAPF-GPT-2M:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./weights/model-2m.pt
+  # MAPF-GPT-6M:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./weights/model-6m.pt
+  # MA-MAPF-GPT-6M-greedy_action:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/greedy_action_3actions_30000_/6m/ckpt.pt
+  morden-MA-MAPF-GPT-6M:
+    name: MAPF-GPT
+    parallel_backend: balanced_dask
+    num_process: 8
+    path_to_weights: ./out_multi_action/with_action_mask_real_action_morden_style_20noise_3actions_40000_/6m/ckpt.pt
+  morden-MA-MAPF-GPT-6M-without_action_mask:
+    name: MAPF-GPT
+    parallel_backend: balanced_dask
+    num_process: 8
+    path_to_weights: ./out_multi_action/without_action_mask_real_action_morden_style_20noise_3actions_40000_/6m/ckpt.pt
+  # MAPF-GPT-85M:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./weights/model-85m.pt
+  # MA-MAPF-GPT-3actions_0n:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_0noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions_5n:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions_10n:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_10noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions_20n:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_20noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions_30n:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_30noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-5actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_5actions_30000/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-2actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_2actions_30000/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_3actions_30000/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-4actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 8
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_4actions_30000/6m/ckpt.pt
+  # old_MAPF-GPT-6M_small_dataset:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out/old_model/6m/ckpt.pt
+  # MAPF-GPT-6M-multiaction-greedyaction:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/9.15_ckpt .pt
+  # MAPF-GPT-6M-multiaction-predictaction:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action/6m/ckpt.pt
+  #   predict_next_action: True
+
+results_views:
+  TabularView1:
+    type: tabular
+    drop_keys:
+      [
+        seed,
+        map_name,
+        ISR,
+        ep_length,
+        runtime,
+        avg_agents_density,
+        makespan,
+        num_agents,
+      ]
+    print_results: True
+  04-puzzles-SoC:
+    type: plot
+    x: num_agents
+    y: SoC
+    width: 4
+    height: 3
+    line_width: 2
+    use_log_scale_x: True
+    legend_font_size: 8
+    font_size: 8
+    name: Puzzles $5\times5$
+    ticks: [2,3,4]
+
+  04-puzzles-CSR:
+    type: plot
+    x: num_agents
+    y: CSR
+    width: 4
+    height: 3
+    line_width: 2
+    use_log_scale_x: True
+    legend_font_size: 8
+    font_size: 8
+    name: Puzzles
+    ticks: [2,3,4]
+    locator_set : 1
+

@@ -1,0 +1,202 @@
+environment:
+  name: Environment
+  with_animation: False
+  on_target: nothing
+  max_episode_steps: 128
+  observation_type: MAPF
+  collision_system: soft
+  seed: 0
+  num_agents:
+    grid_search: [8, 16 ,24, 32, 48, 64]
+  map_name:
+    grid_search:
+      [
+        validation-random-seed-000,
+        validation-random-seed-001,
+        validation-random-seed-002,
+        validation-random-seed-003,
+        # ... (rest commented out implicitly by omission if I replace the block)
+        validation-random-seed-046,
+        validation-random-seed-047,
+        validation-random-seed-048,
+        validation-random-seed-049,
+        validation-random-seed-050,
+        validation-random-seed-051,
+        validation-random-seed-052,
+        validation-random-seed-053,
+        validation-random-seed-054,
+        validation-random-seed-055,
+        validation-random-seed-056,
+        validation-random-seed-057,
+        validation-random-seed-058,
+        validation-random-seed-059,
+        validation-random-seed-060,
+        validation-random-seed-061,
+        validation-random-seed-062,
+        validation-random-seed-063,
+        validation-random-seed-064,
+        validation-random-seed-065,
+        validation-random-seed-066,
+        validation-random-seed-067,
+        validation-random-seed-068,
+        validation-random-seed-069,
+        validation-random-seed-070,
+        validation-random-seed-071,
+        validation-random-seed-072,
+        validation-random-seed-073,
+        validation-random-seed-074,
+        validation-random-seed-075,
+        validation-random-seed-076,
+        validation-random-seed-077,
+        validation-random-seed-078,
+        validation-random-seed-079,
+        validation-random-seed-080,
+        validation-random-seed-081,
+        validation-random-seed-082,
+        validation-random-seed-083,
+        validation-random-seed-084,
+        validation-random-seed-085,
+        validation-random-seed-086,
+        validation-random-seed-087,
+        validation-random-seed-088,
+        validation-random-seed-089,
+        validation-random-seed-090,
+        validation-random-seed-091,
+        validation-random-seed-092,
+        validation-random-seed-093,
+        validation-random-seed-094,
+        validation-random-seed-095,
+        validation-random-seed-096,
+        validation-random-seed-097,
+        validation-random-seed-098,
+        validation-random-seed-099,
+        validation-random-seed-100,
+        validation-random-seed-101,
+        validation-random-seed-102,
+        validation-random-seed-103,
+        validation-random-seed-104,
+        validation-random-seed-105,
+        validation-random-seed-106,
+        validation-random-seed-107,
+        validation-random-seed-108,
+        validation-random-seed-109,
+        validation-random-seed-110,
+        validation-random-seed-111,
+        validation-random-seed-112,
+        validation-random-seed-113,
+        validation-random-seed-114,
+        validation-random-seed-115,
+        validation-random-seed-116,
+        validation-random-seed-117,
+        validation-random-seed-118,
+        validation-random-seed-119,
+        validation-random-seed-120,
+        validation-random-seed-121,
+        validation-random-seed-122,
+        validation-random-seed-123,
+        validation-random-seed-124,
+        validation-random-seed-125,
+        validation-random-seed-126,
+        validation-random-seed-127,
+      ]
+
+algorithms:
+  # MAPF-GPT-2M:
+  #   name: MAPF-GPT
+  #   parallel_backend: sequential
+  #   num_process: 4
+  #   path_to_weights: ./weights/model-2m.pt
+  # MAPF-GPT-6M:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./weights/model-6m.pt
+  # MAPF-GPT-85M:
+  #   name: MAPF-GPT
+  #   parallel_backend: sequential
+  #   num_process: 2
+  #   path_to_weights: ./weights/model-85m.pt
+  # old_MAPF-GPT-6M_small_dataset:
+  #   name: MAPF-GPT
+  #   parallel_backend: sequential
+  #   num_process: 4
+  #   path_to_weights: ./out/old_model/6m/ckpt.pt
+  # MAPF-GPT-6M-multiaction-greedyaction:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/9.15_ckpt .pt
+  # MA-MAPF-GPT-5actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-2actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_2actions/6m/ckpt.pt
+    # predict_next_action: True
+
+  # MA-MAPF-GPT-3actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 3
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_3actions_30000/6m/ckpt.pt
+  #   predict_next_action: True
+  # MA-MAPF-GPT-3actions_2:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 3
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_3actions_40000_/6m/ckpt.pt
+  #   predict_next_action: True
+  
+  CBS:
+    name: CBS
+    parallel_backend: sequential
+    num_process: 1
+
+  # MA-MAPF-GPT-4actions:
+  #   name: MAPF-GPT
+  #   parallel_backend: balanced_dask
+  #   num_process: 4
+  #   path_to_weights: ./out_multi_action/with_action_mask_real_action_5noise_4actions/6m/ckpt.pt
+  #   predict_next_action: True
+
+results_views:
+  TabularView1:
+    type: tabular
+    drop_keys: [seed, map_name]
+    print_results: True
+
+  01-random-mazes-SoC:
+    type: plot
+    x: num_agents
+    y: SoC
+    width: 3.0
+    height: 2.5
+    line_width: 2
+    use_log_scale_x: True
+    legend_font_size: 8
+    font_size: 8
+    name: Random / Mazes
+    ticks: [8, 16, 24, 32, 48, 64]
+
+  01-random-mazes-CSR:
+    type: plot
+    x: num_agents
+    y: CSR
+    width: 3.0
+    height: 2.5
+    line_width: 2
+    use_log_scale_x: True
+    legend_font_size: 8
+    font_size: 8
+    name: Random / Mazes
+    ticks: [8, 16, 24, 32, 48, 64]
+#
+#  TabularAll:
+#    type: tabular
+#    drop_keys: [ seed ]
+#    print_results: True

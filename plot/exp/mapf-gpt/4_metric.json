@@ -1,0 +1,90 @@
+[
+    {
+        "Number of Agents": 64,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.01",
+        "CSR": "0.98 ± 0.02",
+        "ep_length": "114.62 ± 5.47",
+        "SoC": "3151.58 ± 128.66",
+        "makespan": "115.62 ± 5.31",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "5.68 ± 0.28"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "0.96 ± 0.04",
+        "ep_length": "125.51 ± 7.20",
+        "SoC": "3216.40 ± 132.42",
+        "makespan": "126.51 ± 7.00",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "36.11 ± 3.18"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "0.95 ± 0.02",
+        "CSR": "0.81 ± 0.07",
+        "ep_length": "148.30 ± 10.57",
+        "SoC": "7662.88 ± 525.74",
+        "makespan": "149.30 ± 10.27",
+        "avg_agents_density": "0.07 ± 0.01",
+        "Runtime (seconds)": "17.24 ± 1.13"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "0.94 ± 0.02",
+        "CSR": "0.69 ± 0.08",
+        "ep_length": "167.02 ± 11.21",
+        "SoC": "8055.88 ± 629.63",
+        "makespan": "168.02 ± 10.56",
+        "avg_agents_density": "0.07 ± 0.01",
+        "Runtime (seconds)": "121.00 ± 8.06"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "0.90 ± 0.03",
+        "CSR": "0.56 ± 0.09",
+        "ep_length": "187.41 ± 10.82",
+        "SoC": "14038.02 ± 1030.69",
+        "makespan": "188.41 ± 11.57",
+        "avg_agents_density": "0.11 ± 0.01",
+        "Runtime (seconds)": "34.19 ± 2.24"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "0.89 ± 0.03",
+        "CSR": "0.51 ± 0.08",
+        "ep_length": "194.10 ± 11.37",
+        "SoC": "14508.58 ± 1095.23",
+        "makespan": "195.10 ± 11.03",
+        "avg_agents_density": "0.11 ± 0.01",
+        "Runtime (seconds)": "211.19 ± 12.13"
+    },
+    {
+        "Number of Agents": 256,
+        "Algorithm": "MAPF-GPT-6M",
+        "ISR": "0.82 ± 0.03",
+        "CSR": "0.34 ± 0.08",
+        "ep_length": "217.11 ± 9.88",
+        "SoC": "22981.85 ± 1663.09",
+        "makespan": "218.11 ± 10.26",
+        "avg_agents_density": "0.15 ± 0.01",
+        "Runtime (seconds)": "53.12 ± 2.51"
+    },
+    {
+        "Number of Agents": 256,
+        "Algorithm": "MAPF-GPT-85M",
+        "ISR": "0.79 ± 0.03",
+        "CSR": "0.26 ± 0.07",
+        "ep_length": "225.59 ± 8.82",
+        "SoC": "24494.50 ± 1769.91",
+        "makespan": "226.59 ± 9.43",
+        "avg_agents_density": "0.16 ± 0.01",
+        "Runtime (seconds)": "324.13 ± 13.33"
+    }
+]

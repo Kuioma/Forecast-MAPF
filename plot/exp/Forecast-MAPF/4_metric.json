@@ -1,0 +1,46 @@
+[
+    {
+        "Number of Agents": 64,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "113.60 ± 3.95",
+        "SoC": "3165.61 ± 110.62",
+        "makespan": "114.60 ± 4.14",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "17.78 ± 0.96"
+    },
+    {
+        "Number of Agents": 128,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.99 ± 0.01",
+        "CSR": "0.94 ± 0.04",
+        "ep_length": "130.18 ± 7.02",
+        "SoC": "7127.80 ± 406.99",
+        "makespan": "131.18 ± 7.10",
+        "avg_agents_density": "0.07 ± 0.00",
+        "Runtime (seconds)": "50.64 ± 2.79"
+    },
+    {
+        "Number of Agents": 192,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.97 ± 0.01",
+        "CSR": "0.89 ± 0.05",
+        "ep_length": "147.48 ± 8.45",
+        "SoC": "11976.14 ± 744.65",
+        "makespan": "148.48 ± 8.57",
+        "avg_agents_density": "0.10 ± 0.01",
+        "Runtime (seconds)": "90.13 ± 5.29"
+    },
+    {
+        "Number of Agents": 256,
+        "Algorithm": "Forecast-MAPF",
+        "ISR": "0.95 ± 0.02",
+        "CSR": "0.77 ± 0.07",
+        "ep_length": "171.62 ± 9.59",
+        "SoC": "18744.57 ± 1246.21",
+        "makespan": "172.62 ± 10.38",
+        "avg_agents_density": "0.13 ± 0.01",
+        "Runtime (seconds)": "141.81 ± 8.27"
+    }
+]

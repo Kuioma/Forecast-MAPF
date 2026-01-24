@@ -1,0 +1,35 @@
+[
+    {
+        "Number of Agents": 2,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "8.99 ± 2.37",
+        "SoC": "17.51 ± 4.76",
+        "makespan": "9.99 ± 2.45",
+        "avg_agents_density": "0.02 ± 0.00",
+        "Runtime (seconds)": "0.07 ± 0.02"
+    },
+    {
+        "Number of Agents": 3,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "0.96 ± 0.03",
+        "CSR": "0.95 ± 0.03",
+        "ep_length": "20.96 ± 5.04",
+        "SoC": "60.13 ± 15.44",
+        "makespan": "21.96 ± 4.82",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.23 ± 0.05"
+    },
+    {
+        "Number of Agents": 4,
+        "Algorithm": "Forecast-MAPF-greedy_action",
+        "ISR": "0.86 ± 0.05",
+        "CSR": "0.81 ± 0.06",
+        "ep_length": "39.25 ± 6.95",
+        "SoC": "145.57 ± 28.32",
+        "makespan": "40.25 ± 7.24",
+        "avg_agents_density": "0.04 ± 0.00",
+        "Runtime (seconds)": "0.61 ± 0.11"
+    }
+]

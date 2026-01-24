@@ -1,0 +1,68 @@
+[
+    {
+        "Number of Agents": 8,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "26.27 ± 1.06",
+        "SoC": "125.48 ± 4.49",
+        "makespan": "27.27 ± 1.07",
+        "avg_agents_density": "0.03 ± 0.00",
+        "Runtime (seconds)": "0.58 ± 0.05"
+    },
+    {
+        "Number of Agents": 16,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "30.54 ± 1.14",
+        "SoC": "269.10 ± 8.83",
+        "makespan": "31.54 ± 1.17",
+        "avg_agents_density": "0.06 ± 0.00",
+        "Runtime (seconds)": "1.46 ± 0.08"
+    },
+    {
+        "Number of Agents": 24,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "34.67 ± 1.73",
+        "SoC": "436.64 ± 16.27",
+        "makespan": "35.67 ± 1.63",
+        "avg_agents_density": "0.08 ± 0.00",
+        "Runtime (seconds)": "2.90 ± 0.11"
+    },
+    {
+        "Number of Agents": 32,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "1.00 ± 0.00",
+        "CSR": "1.00 ± 0.00",
+        "ep_length": "38.14 ± 1.78",
+        "SoC": "653.54 ± 28.45",
+        "makespan": "39.14 ± 1.73",
+        "avg_agents_density": "0.11 ± 0.00",
+        "Runtime (seconds)": "4.49 ± 0.19"
+    },
+    {
+        "Number of Agents": 48,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "0.99 ± 0.01",
+        "CSR": "0.97 ± 0.03",
+        "ep_length": "49.94 ± 4.18",
+        "SoC": "1282.05 ± 96.42",
+        "makespan": "50.94 ± 3.90",
+        "avg_agents_density": "0.15 ± 0.00",
+        "Runtime (seconds)": "8.42 ± 0.61"
+    },
+    {
+        "Number of Agents": 64,
+        "Algorithm": "morden-MA-MAPF-GPT-6M",
+        "ISR": "0.97 ± 0.02",
+        "CSR": "0.91 ± 0.05",
+        "ep_length": "65.48 ± 5.06",
+        "SoC": "2275.81 ± 194.45",
+        "makespan": "66.48 ± 5.16",
+        "avg_agents_density": "0.20 ± 0.01",
+        "Runtime (seconds)": "14.53 ± 0.99"
+    }
+]
