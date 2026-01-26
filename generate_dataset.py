@@ -15,7 +15,8 @@ from pogema_toolbox.create_env import Environment
 from pogema_toolbox.eval_utils import initialize_wandb, save_evaluation_results
 from pogema_toolbox.evaluator import evaluation
 from pogema_toolbox.registry import ToolboxRegistry
-
+import wandb
+wandb.init(mode="offline")
 from create_env import create_logging_env
 from lacam.inference import LacamInference, LacamInferenceConfig
 from tokenizer.generate_observations import ObservationGenerator
@@ -27,15 +28,15 @@ DATASET_FOLDER = "dataset/input_real_action"
 CONFIGS = [
     # "dataset_configs/10-medium-mazes/temp.yaml",
     # "dataset_configs/12-medium-random/temp.yaml",
-    "dataset_configs/10-medium-mazes/temp_0.yaml",
-    "dataset_configs/10-medium-mazes/temp_1.yaml",
-    "dataset_configs/10-medium-mazes/temp_2.yaml",
-    "dataset_configs/10-medium-mazes/temp_3.yaml",
-    # "dataset_configs/10-medium-mazes/10-medium-mazes-part1.yaml",
-    # "dataset_configs/10-medium-mazes/10-medium-mazes-part2.yaml",
-    # "dataset_configs/10-medium-mazes/10-medium-mazes-part3.yaml",
-    # "dataset_configs/10-medium-mazes/10-medium-mazes-part4.yaml",
-    # "dataset_configs/12-medium-random/temp.yaml",
+    # "dataset_configs/10-medium-mazes/temp_0.yaml",
+    # "dataset_configs/10-medium-mazes/temp_1.yaml",
+    # "dataset_configs/10-medium-mazes/temp_2.yaml",
+    # "dataset_configs/10-medium-mazes/temp_3.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-mazes-part1.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-mazes-part2.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-mazes-part3.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-mazes-part4.yaml",
+    "dataset_configs/12-medium-random/temp.yaml",
     #"dataset_configs/12-medium-random/12-medium-random-part1.yaml",
 ]
 
@@ -43,15 +44,14 @@ RANDOM_MAPS_FOLDER = "dataset_configs/12-medium-random"
 MAZES_MAPS_FOLDER = "dataset_configs/10-medium-mazes"
 
 NUM_CHUNKS = 50
-NUM_CHUNKS = 1
-
 FILE_PER_CHUNK = 10
 DESIRED_SIZE = 10*2**21 # per chunk
 MAZE_RATIO = 0.9
 NUM_PROCESSES = 50
-NUM_PROCESSES = 20
-
-NUM_ACTIONS = 5
+AGENT_RADIUS = 6
+COST2GO_RADIUS = 6
+NUM_ACTIONS = 6
+CONTEXT_SIZE = 256
 
 def tensor_to_hash(tensor):
     tensor_bytes = tensor.tobytes()
@@ -69,10 +69,18 @@ def get_files_by_type(folder_path):
 def generate_part(map_name, maps):
     print("processing map", map_name)
     cfg = InputParameters()
+    def radius_token_addition(start,end):
+        result = (2*end+1)*(2*end+1)-(2*start+1)*(2*start+1)
+        return result
+    cfg.context_size = cfg.context_size+radius_token_addition(cfg.agents_radius,AGENT_RADIUS)
+    global CONTEXT_SIZE 
+    CONTEXT_SIZE = cfg.context_size
+    cfg.agents_radius = AGENT_RADIUS
+    cfg.cost2go_radius = COST2GO_RADIUS
     with open(map_name, "r") as f:
         data = json.load(f)
     generator = ObservationGenerator(maps, data, cfg)
-    tensors, gt_actions,all_data = generator.generate_observations_kuioma(0,len(data))
+    tensors, gt_actions,all_data = generator.generate_observations_kuioma(0,len(data),n_actions=NUM_ACTIONS)
     # tensors, gt_actions = generator.generate_observations(0, len(data))
     return tensors, gt_actions
 
@@ -159,7 +167,7 @@ def process_file(file, maps):
     tensors, actions = balance_and_filter_tensors(tensors, actions)
     return file, tensors, actions
 
-def process_files(maze_files, random_files, output_file,n_actions=5):
+def process_files(maze_files, random_files, output_file,n_actions=6):
     # TODO
     # 修改了
     maps_random = yaml.safe_load(open(f"{RANDOM_MAPS_FOLDER}/maps.yaml", "r"))
@@ -186,7 +194,7 @@ def process_files(maze_files, random_files, output_file,n_actions=5):
     maze_elements_to_pick, total_maze_elements = calculate_elements_to_pick(maze_data, maze_desired_size)
     random_elements_to_pick, total_random_elements = calculate_elements_to_pick(random_data, random_desired_size)
     
-    all_tensors = np.empty((total_maze_elements + total_random_elements, 256), dtype=np.int8)
+    all_tensors = np.empty((total_maze_elements + total_random_elements, CONTEXT_SIZE), dtype=np.int8)
     # all_actions = np.empty(total_maze_elements + total_random_elements, dtype=np.int8)
     all_actions = np.empty((total_maze_elements + total_random_elements, n_actions), dtype=np.int8)
 
@@ -288,12 +296,12 @@ def generate_chunks():
         
 def main():
     # Step 1: Run LaCAM to obtain expert data in json format.
-    # run_expert()
+    run_expert()
 
     # Step 2: Load one (or mutiple) big json file and split it (them) into small ones (1 map = 1 json).
-    # files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
-    # with mp.Pool() as pool:
-    #     pool.map(split_json, files)
+    files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
+    with mp.Pool() as pool:
+        pool.map(split_json, files)
     # split_json(files[0])
     
     # Step 3: Generate dataset with chunk files.

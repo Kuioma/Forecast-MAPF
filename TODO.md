@@ -1,0 +1,2 @@
+1. 数据生成，直接跑generate_dataset.py,如果爆内存的话，就把dataset_configs中的用到的yaml中的map_name:grid_search:注释掉一半，但应该不会我之前在公司服务器上跑就这个配置
+2. 运行train_multi_action.py修改配置训练三个模型，num_actions=4,5,6,train_data_file路径记得更换，val_data_file从生成的dataset中随便拉两个就行

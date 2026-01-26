@@ -1,7 +1,7 @@
-from tokenizer.encoder import AgentsInfo, Encoder, InputParameters
+from tokenizer.encoder_ import AgentsInfo, Encoder, InputParameters
 
 import numpy as np
-import cppimport.import_hook
+# import cppimport.import_hook
 from tokenizer import cost2go
 from tokenizer.parameters import InputParameters as PyInputParameters
 import copy

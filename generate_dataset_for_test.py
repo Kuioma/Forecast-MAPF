@@ -46,8 +46,10 @@ DESIRED_SIZE = 10*2**21 # per chunk
 MAZE_RATIO = 0.9
 NUM_PROCESSES = 50
 NUM_PROCESSES = 20
-
-NUM_ACTIONS = 5
+AGENT_RADIUS = 6
+COST2GO_RADIUS = 6
+NUM_ACTIONS = 6
+CONTEXT_SIZE = 256
 
 def tensor_to_hash(tensor):
     tensor_bytes = tensor.tobytes()
@@ -65,10 +67,18 @@ def get_files_by_type(folder_path):
 def generate_part(map_name, maps):
     print("processing map", map_name)
     cfg = InputParameters()
+    def radius_token_addition(start,end):
+        result = (2*end+1)*(2*end+1)-(2*start+1)*(2*start+1)
+        return result
+    cfg.context_size = cfg.context_size+radius_token_addition(cfg.agents_radius,AGENT_RADIUS)
+    global CONTEXT_SIZE 
+    CONTEXT_SIZE = cfg.context_size
+    cfg.agents_radius = AGENT_RADIUS
+    cfg.cost2go_radius = COST2GO_RADIUS
     with open(map_name, "r") as f:
         data = json.load(f)
     generator = ObservationGenerator(maps, data, cfg)
-    tensors, gt_actions,all_data = generator.generate_observations_kuioma(0,len(data))
+    tensors, gt_actions,all_data = generator.generate_observations_kuioma(0,len(data),n_actions=NUM_ACTIONS)
     # tensors, gt_actions = generator.generate_observations(0, len(data))
     return tensors, gt_actions
 
@@ -155,7 +165,7 @@ def process_file(file, maps):
     tensors, actions = balance_and_filter_tensors(tensors, actions)
     return file, tensors, actions
 
-def process_files(maze_files, random_files, output_file):
+def process_files(maze_files, random_files, output_file,n_actions=6):
     # TODO
     # 修改了
     maps_random = yaml.safe_load(open(f"{RANDOM_MAPS_FOLDER}/maps.yaml", "r"))
@@ -192,9 +202,9 @@ def process_files(maze_files, random_files, output_file):
     maze_elements_to_pick, total_maze_elements = calculate_elements_to_pick(maze_data, maze_desired_size)
     random_elements_to_pick, total_random_elements = calculate_elements_to_pick(random_data, random_desired_size)
     
-    all_tensors = np.empty((total_maze_elements + total_random_elements, 256), dtype=np.int8)
+    all_tensors = np.empty((total_maze_elements + total_random_elements, CONTEXT_SIZE), dtype=np.int8)
     # all_actions = np.empty(total_maze_elements + total_random_elements, dtype=np.int8)
-    all_actions = np.empty((total_maze_elements + total_random_elements, 5), dtype=np.int8)
+    all_actions = np.empty((total_maze_elements + total_random_elements, n_actions), dtype=np.int8)
 
     
     current_index = 0

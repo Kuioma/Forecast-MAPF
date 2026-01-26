@@ -58,6 +58,7 @@ backend = "nccl"  # 'nccl', 'gloo', etc.
 # system
 device = ("cuda")  # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
 
+
 if 'cuda' in device and not torch.cuda.is_available():
     device = 'cpu'
     logger.warning(f'Cuda is not available, switching to {device}')

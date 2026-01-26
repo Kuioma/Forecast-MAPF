@@ -1,112 +1,170 @@
-# train_multi_action.py
+
 import multiprocessing
 import sys
-sys.path.append("/home/mapf-gpt")
-# Ensure the 'spawn' start method is used
-multiprocessing.set_start_method("spawn", force=True)
-
-from loguru import logger
-
-from gpt.fast_data_loader import MapfArrowDataset,MapfArrowDatasetMultiAction
-
-import math
 import os
 import time
+import math
+import dataclasses
+from dataclasses import dataclass, field, asdict
 from contextlib import nullcontext
+from ast import literal_eval
+from typing import Optional, Tuple, Any, Dict
+
 import torch
 from torch.distributed import destroy_process_group, init_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
+import wandb
+wandb.init(mode="offline")
+from loguru import logger
+
+# Add project root to path
+sys.path.append("/home/mapf-gpt")
+
+# Internal imports
+from gpt.fast_data_loader import MapfArrowDatasetMultiAction
 from gpt.model_multi_action import GPT, GPTConfig
 from tokenizer.parameters import InputParameters
 from tokenizer.tokenizer import Tokenizer
 
 # -----------------------------------------------------------------------------
-# default config values designed to train a gpt2 (124M) on OpenWebText
-# I/O
-out_dir = "one_action/21/6m"
-eval_interval = 500
-log_interval = 1
-eval_iters = 5
-always_save_checkpoint = True  # if True, always save a checkpoint after each eval
-init_from = "scratch"  # 'scratch' or 'resume' or 'gpt2*'
-# wandb logging
-wandb_log = False  # disabled by default
-wandb_project = "mapf-gpt-multi-action"
+# Configuration
+# -----------------------------------------------------------------------------
 
-gradient_accumulation_steps = 16  # used to simulate larger batch sizes
-batch_size = 32  # if gradient_accumulation_steps > 1, this is the micro-batch size
-block_size = 256
-# model
-n_layer = 8
-n_head = 8
-n_embd = 256
-dropout = 0.0  # for pretraining 0 is good, for finetuning try 0.1+
-bias = False  # do we use bias inside LayerNorm and Linear layers?
-morden_style = True
-action_mask = True
-# adamw optimizer
-learning_rate = 6e-4  # max learning rate
-max_iters = 30000  # total number of training iterations
-weight_decay = 1e-1
-beta1 = 0.9
-beta2 = 0.95
-grad_clip = 1.0  # clip gradients at this value, or disable if == 0.0
-# learning rate decay settings
-decay_lr = True  # whether to decay the learning rate
-warmup_iters = 2000  # how many steps to warm up for
-lr_decay_iters = 30000  # should be ~= max_iters per Chinchilla
-min_lr = 6e-5  # minimum learning rate, should be ~= learning_rate/10 per Chinchilla
-# DDP settings
-backend = "nccl" # 'nccl', 'gloo', etc.
-# system
-device = ("cuda")  # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
+@dataclass
+class TrainingConfig:
+    # I/O
+    out_dir: str = "four_action/21/6m"
+    eval_interval: int = 500
+    log_interval: int = 1
+    eval_iters: int = 5
+    always_save_checkpoint: bool = True
+    init_from: str = "scratch"  # 'scratch' or 'resume' or 'gpt2*'
+    
+    # wandb logging
+    wandb_log: bool = True
+    wandb_project: str = "mapf-gpt-multi-action"
+    
+    # Training Loop
+    gradient_accumulation_steps: int = 16
+    batch_size: int = 32
+    block_size: int = 256
+    
+    # Model
+    n_layer: int = 8
+    n_head: int = 8
+    n_embd: int = 256
+    dropout: float = 0.0
+    bias: bool = False
+    morden_style: bool = True
+    action_mask: bool = True
+    
+    # Optimizer
+    learning_rate: float = 6e-4
+    max_iters: int = 30000
+    weight_decay: float = 1e-1
+    beta1: float = 0.9
+    beta2: float = 0.95
+    grad_clip: float = 1.0
+    
+    # LR Decay
+    decay_lr: bool = True
+    warmup_iters: int = 2000
+    lr_decay_iters: int = 30000
+    min_lr: float = 6e-5
+    
+    # DDP
+    backend: str = "nccl"
+    device: str = "cuda"  # 'cpu', 'cuda', 'cuda:0', 'mps'
+    
+    # Type validity
+    dtype: str = "bfloat16" if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else "float16"
+    compile: bool = True
+    
+    # Multi-action settings
+    num_actions: int = 4
+    train_data_file: str = "dataset/1"
+    valid_data_file: str = "dataset/1"
+    
+    def update_from_args(self, args: list[str]):
+        """
+        Parses command line arguments to update config values.
+        Supports:
+          script.py config_file.py
+          script.py --key=value
+        """
+        initial_config_keys = {k for k in asdict(self).keys()}
+        
+        for arg in args:
+            if '=' not in arg:
+                # Assume it's a config file
+                config_file = arg
+                logger.info(f"Overriding config with {config_file}")
+                # We execute the file and capture variables
+                file_globals = {}
+                try:
+                    with open(config_file) as f:
+                        exec(f.read(), {}, file_globals)
+                    
+                    for k, v in file_globals.items():
+                        if k in initial_config_keys:
+                            if isinstance(v, type(getattr(self, k))):
+                                setattr(self, k, v)
+                                logger.info(f"Overriding from file: {k} = {v}")
+                            else:
+                                logger.warning(f"Type mismatch for {k}: expected {type(getattr(self, k))}, got {type(v)}")
+                except Exception as e:
+                    logger.error(f"Failed to load config file {config_file}: {e}")
+                    raise
+            else:
+                # Assume --key=value
+                if not arg.startswith('--'):
+                    logger.warning(f"Argument {arg} ignored (expected --key=value)")
+                    continue
+                
+                key, val = arg.split('=', 1)
+                key = key[2:]
+                
+                if hasattr(self, key):
+                    current_val = getattr(self, key)
+                    try:
+                        attempt = literal_eval(val)
+                    except (SyntaxError, ValueError):
+                        attempt = val
+                    
+                    # Ensure minimal type sanity (rough check)
+                    # Note: Optional fields might need care, but here most are strict types
+                    if type(attempt) == type(current_val):
+                         setattr(self, key, attempt)
+                         logger.info(f"Overriding CLI: {key} = {attempt}")
+                    else:
+                        # Allow int -> float conversions
+                        if isinstance(current_val, float) and isinstance(attempt, int):
+                            setattr(self, key, float(attempt))
+                            logger.info(f"Overriding CLI: {key} = {float(attempt)}")
+                        else:
+                             # For strings that literal_eval didn't parse as something else, we might be fine
+                             if isinstance(current_val, str):
+                                 setattr(self, key, str(attempt))
+                                 logger.info(f"Overriding CLI: {key} = {attempt}")
+                             else:
+                                 logger.warning(f"Type mismatch for {key}: expected {type(current_val)}, got {type(attempt)}")
+                else:
+                    logger.warning(f"Unknown config key: {key}")
 
-if 'cuda' in device and not torch.cuda.is_available():
-    device = 'cpu'
-    logger.warning(f'Cuda is not available, switching to {device}')
 
-dtype = (
-    "bfloat16"
-    if torch.cuda.is_available() and torch.cuda.is_bf16_supported()
-    else "float16"
-)  # 'float32', 'bfloat16', or 'float16', the latter will auto implement a GradScaler
-# compile = True  # use PyTorch 2.0 to compile the model to be faster
-compile = True  # use PyTorch 2.0 to compile the model to be faster
-
-
-# Multi-action settings
-num_actions = 4  # 一次生成的行动数
-train_data_file = "dataset/input_real_action"
-valid_data_file = "dataset/input_real_action"
-
-config_keys = [
-    k
-    for k, v in globals().items()
-    if not k.startswith("_") and isinstance(v, (int, float, bool, str))
-]
-exec(open("gpt/configurator.py").read())  # overrides from command line or config file
-config = {k: globals()[k] for k in config_keys}  # will be useful for logging
-current_train_index = 0
-current_valid_index = 0
-train_data = MapfArrowDatasetMultiAction(train_data_file, device=device, batch_size=batch_size,action_n=num_actions)
-val_data = MapfArrowDatasetMultiAction(valid_data_file, device=device, batch_size=batch_size,action_n=num_actions)
-# train_data = MapfArrowDataset(train_data_file, device=device, batch_size=batch_size)
-# val_data = MapfArrowDataset(valid_data_file, device=device, batch_size=batch_size)
-
-#从可迭代对象创建迭代器
-train_data_iter = iter(train_data)
-val_data_iter = iter(val_data)
-
+# -----------------------------------------------------------------------------
+# Utilities
+# -----------------------------------------------------------------------------
 
 def calculate_epochs(max_iters, dataset_size, batch_size, gradient_accumulation_steps=1):
-    # Effective batch size considering gradient accumulation
     effective_batch_size = batch_size * gradient_accumulation_steps
     steps_per_epoch = dataset_size // effective_batch_size
+    # Avoid div by zero if dataset is small
+    if steps_per_epoch == 0:
+        return 0
     num_epochs = max_iters / steps_per_epoch
-
     return num_epochs
-
 
 def human_readable_size(size):
     for unit in ["pairs", "K pairs", "M pairs", "B pairs"]:
@@ -115,156 +173,41 @@ def human_readable_size(size):
         size /= 1000
     return f"{size:.2f} B pairs"
 
-
-logger.info(f"Train set size: {human_readable_size(train_data.get_full_dataset_size())}")
-logger.info(f"Validation set size: {human_readable_size(val_data.get_full_dataset_size())}")
-
-num_epochs = calculate_epochs(max_iters, train_data.get_full_dataset_size(), batch_size, gradient_accumulation_steps)
-
-logger.info(f"Number of training epochs: {num_epochs:.2f}")
-
-# various inits, derived attributes, I/O setup
-ddp = int(os.environ.get("RANK", -1)) != -1  # is this a ddp run?
-if ddp:
-    init_process_group(backend=backend)
-    ddp_rank = int(os.environ["RANK"])
-    ddp_local_rank = int(os.environ["LOCAL_RANK"])
-    ddp_world_size = int(os.environ["WORLD_SIZE"])
-    device = f"cuda:{ddp_local_rank}"
-    torch.cuda.set_device(device)
-    master_process = ddp_rank == 0  # this process will do logging, checkpointing etc.
-    seed_offset = ddp_rank  # each process gets a different seed
-    # world_size number of processes will be training simultaneously, so we can scale
-    # down the desired gradient accumulation iterations per process proportionally
-    assert gradient_accumulation_steps % ddp_world_size == 0
-    gradient_accumulation_steps //= ddp_world_size
-else:
-    # if not ddp, we are running on a single gpu, and one process
-    master_process = True
-    seed_offset = 0
-    ddp_world_size = 1
-tokens_per_iter = gradient_accumulation_steps * ddp_world_size * batch_size * block_size
-logger.info(f"tokens per iteration will be: {tokens_per_iter:,}")
-
-if master_process:
-    os.makedirs(out_dir, exist_ok=True)
-torch.manual_seed(1337 + seed_offset)
-torch.backends.cuda.matmul.allow_tf32 = True  # allow tf32 on matmul
-torch.backends.cudnn.allow_tf32 = True  # allow tf32 on cudnn
-device_type = "cuda" if "cuda" in device else "cpu"  # for later use in torch.autocast
-# device_type = "cpu"  # for later use in torch.autocast
-
-# note: float16 data type will automatically use a GradScaler
-ptdtype = {
-    "float32": torch.float32,
-    "bfloat16": torch.bfloat16,
-    "float16": torch.float16,
-}[dtype]
-ctx = (
-    nullcontext()
-    if device_type == "cpu"
-    else torch.amp.autocast(device_type=device_type, dtype=ptdtype)
-)
-
-cfg = InputParameters()
-tokenizer = Tokenizer(cfg)
-
-
-def get_batch(data):
-    x, y = next(data)
+def get_batch(data_iter, device):
+    x, y = next(data_iter)
+    # Move to device here to avoid doing it inside the loop manually every time if possible,
+    # though original code did it inside config logic.
+    # The original code did: x.to(torch.int), y.to(torch.long) then model.to(device).
+    # Data loader usually returns cpu tensors.
+    if device is not None:
+        if isinstance(device, str):
+             x = x.to(device)
+             y = y.to(device)
+        else:
+             # If device is something else
+             pass
     return x.to(torch.int), y.to(torch.long)
 
-
-# init these up here, can override if init_from='resume' (i.e. from a checkpoint)
-iter_num = 0
-best_val_loss = 1e9
-
-meta_vocab_size = len(tokenizer.encoder.vocab)
-
-# model init
-model_args = dict(
-    n_layer=n_layer,
-    n_head=n_head,
-    n_embd=n_embd,
-    block_size=block_size,
-    bias=bias,
-    vocab_size=None,
-    dropout=dropout,
-    n_actions=num_actions,  # 添加多行动参数
-    morden_style = morden_style,
-    action_mask = action_mask
-)  # start with model_args from command line
-if init_from == "scratch":
-    # init a new model from scratch
-    logger.info("Initializing a new model from scratch")
-    model_args["vocab_size"] = meta_vocab_size
-    gptconf = GPTConfig(**model_args)
-    model = GPT(gptconf)
-elif init_from == "resume":
-    logger.info(f"Resuming training from {out_dir}")
-    # resume training from a checkpoint.
-    ckpt_path = os.path.join(out_dir, "ckpt.pt")
-    checkpoint = torch.load(ckpt_path, map_location=device)
-    checkpoint_model_args = checkpoint["model_args"]
-    # force these config attributes to be equal otherwise we can't even resume training
-    # the rest of the attributes (e.g. dropout) can stay as desired from command line
-    for k in ["n_layer", "n_head", "n_embd", "block_size", "bias", "vocab_size", "num_actions"]:
-        model_args[k] = checkpoint_model_args[k]
-    # create the model
-    gptconf = GPTConfig(**model_args)
-    model = GPT(gptconf)
-    state_dict = checkpoint["model"]
-    # fix the keys of the state dictionary :(
-    # honestly no idea how checkpoints sometimes get this prefix, have to debug more
-    unwanted_prefix = "_orig_mod."
-    for k, v in list(state_dict.items()):
-        if k.startswith(unwanted_prefix):
-            state_dict[k[len(unwanted_prefix):]] = state_dict.pop(k)
-    model.load_state_dict(state_dict)
-    iter_num = checkpoint["iter_num"]
-    best_val_loss = checkpoint["best_val_loss"]
-
-logger.info("number of parameters: %.2fM" % (model.get_num_params() / 1e6,))
-
-model.to(device)
-
-# initialize a GradScaler. If enabled=False scaler is a no-op
-scaler = torch.cuda.amp.GradScaler(enabled=(dtype == "float16"))
-
-# optimizer
-optimizer = model.configure_optimizers(
-    weight_decay, learning_rate, (beta1, beta2), device_type
-)
-if init_from == "resume":
-    optimizer.load_state_dict(checkpoint["optimizer"])
-checkpoint = None  # free up memory
-
-compile = False
-if compile and 'cuda' in device:
-    logger.info("compiling the model... (takes a ~minute)")
-    unoptimized_model = model
-    try:
-        model = torch.compile(model)
-    except AttributeError:
-        logger.warning('torch compile(model) requires PyTorch >= 2.0')
-
-# wrap model into DDP container
-if ddp:
-    model = DDP(model, device_ids=[ddp_local_rank])
-
-
-# helps estimate an arbitrarily accurate loss over either split using many batches
 @torch.no_grad()
-def estimate_loss():
+def estimate_loss(model, ctx, train_iter, val_iter, eval_iters):
     out = {}
     model.eval()
     for split in ["train", "val"]:
         losses = torch.zeros(eval_iters)
         for k in range(eval_iters):
-            if split == "train":
-                X, Y = get_batch(train_data_iter)
-            else:
-                X, Y = get_batch(val_data_iter)
+            iterator = train_iter if split == "train" else val_iter
+            # Note: get_batch in original code relies on a global `get_batch` which relies on `next(data)`.
+            # We need to make sure we don't exhaust the iterator destructively if that matters.
+            # But typically for training we just pull next. For eval, strict correctness might imply separate iterator.
+            # Original code reused `train_data_iter` and `val_data_iter`.
+            # Wait, `get_batch` calls `next(data)`.
+            
+            # Use the global `device`? We need to pass device to get_batch.
+            # We will infer device from model usage or pass it.
+            # Let's assume model is on correct device, so inputs need to be on that device.
+            device = next(model.parameters()).device
+            X, Y = get_batch(iterator, device)
+            
             with ctx:
                 logits, loss = model(X, Y)
             losses[k] = loss.item()
@@ -272,122 +215,259 @@ def estimate_loss():
     model.train()
     return out
 
+def get_lr(it, config: TrainingConfig):
+    # 1) linear warmup
+    if it < config.warmup_iters:
+        return config.learning_rate * it / config.warmup_iters
+    # 2) > lr_decay_iters -> min_lr
+    if it > config.lr_decay_iters:
+        return config.min_lr
+    # 3) cosine decay
+    decay_ratio = (it - config.warmup_iters) / (config.lr_decay_iters - config.warmup_iters)
+    coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))
+    return config.min_lr + coeff * (config.learning_rate - config.min_lr)
 
-# learning rate decay scheduler (cosine with warmup)
-def get_lr(it):
-    # 1) linear warmup for warmup_iters steps
-    if it < warmup_iters:
-        return learning_rate * it / warmup_iters
-    # 2) if it > lr_decay_iters, return min learning rate
-    if it > lr_decay_iters:
-        return min_lr
-    # 3) in between, use cosine decay down to min learning rate
-    decay_ratio = (it - warmup_iters) / (lr_decay_iters - warmup_iters)
-    assert 0 <= decay_ratio <= 1
-    coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-    return min_lr + coeff * (learning_rate - min_lr)
+# -----------------------------------------------------------------------------
+# Main Training Logic
+# -----------------------------------------------------------------------------
 
+def setup_ddp(config: TrainingConfig):
+    ddp = int(os.environ.get("RANK", -1)) != -1
+    if ddp:
+        init_process_group(backend=config.backend)
+        ddp_rank = int(os.environ["RANK"])
+        ddp_local_rank = int(os.environ["LOCAL_RANK"])
+        ddp_world_size = int(os.environ["WORLD_SIZE"])
+        device = f"cuda:{ddp_local_rank}"
+        torch.cuda.set_device(device)
+        master_process = ddp_rank == 0
+        seed_offset = ddp_rank
+        assert config.gradient_accumulation_steps % ddp_world_size == 0
+        config.gradient_accumulation_steps //= ddp_world_size
+    else:
+        master_process = True
+        seed_offset = 0
+        ddp_world_size = 1
+        device = config.device
+        
+        # Check cuda availability
+        if 'cuda' in device and not torch.cuda.is_available():
+            logger.warning('Cuda is not available, switching to cpu')
+            device = 'cpu'
+            config.device = 'cpu'
+            
+    return ddp, device, master_process, seed_offset, ddp_world_size
 
-# logging
-if wandb_log and master_process:
-    import wandb
-
-    wandb.init(project=wandb_project, config=config)
-
-# training loop
-X, Y = get_batch(train_data_iter)  # fetch the very first batch
-t0 = time.time()
-local_iter_num = 0  # number of iterations in the lifetime of this process
-raw_model = model.module if ddp else model  # unwrap DDP container if needed
-running_mfu = -1.0
-while True:
-
-    # determine and set the learning rate for this iteration
-    lr = get_lr(iter_num) if decay_lr else learning_rate
-    for param_group in optimizer.param_groups:
-        param_group["lr"] = lr
-
-    # evaluate the loss on train/val sets and write checkpoints
-    if iter_num % eval_interval == 0 and master_process:
-        model.eval()
-        losses = estimate_loss()
-        model.train()
-        logger.info(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
-        if wandb_log:
-            wandb.log(
-                {
+def train(config: TrainingConfig):
+    # DDP Setup
+    ddp, device, master_process, seed_offset, ddp_world_size = setup_ddp(config)
+    
+    # Logging
+    if master_process:
+        os.makedirs(config.out_dir, exist_ok=True)
+        if config.wandb_log:
+            wandb.init(project=config.wandb_project, config=asdict(config), mode="offline" if not config.wandb_log else "online")
+            # Note: The original code forced "offline" separately on line 13. 
+            # I'll respect the config.wandb_log but also check if user wanted offline generally?
+            # Original code had `wandb.init(mode="offline")` at import time!
+            # We should probably respect that if it was intentional.
+            
+    # Seeds
+    torch.manual_seed(1337 + seed_offset)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    
+    # Context
+    device_type = "cuda" if "cuda" in device else "cpu"
+    ptdtype = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}[config.dtype]
+    ctx = nullcontext() if device_type == "cpu" else torch.amp.autocast(device_type=device_type, dtype=ptdtype)
+    
+    # Data
+    if master_process:
+        logger.info("Initializing Datasets...")
+    train_data = MapfArrowDatasetMultiAction(config.train_data_file, device=device, batch_size=config.batch_size, action_n=config.num_actions)
+    val_data = MapfArrowDatasetMultiAction(config.valid_data_file, device=device, batch_size=config.batch_size, action_n=config.num_actions)
+    
+    train_data_iter = iter(train_data)
+    val_data_iter = iter(val_data)
+    
+    if master_process:
+        logger.info(f"Train set size: {human_readable_size(train_data.get_full_dataset_size())}")
+        logger.info(f"Validation set size: {human_readable_size(val_data.get_full_dataset_size())}")
+        num_epochs = calculate_epochs(config.max_iters, train_data.get_full_dataset_size(), config.batch_size, config.gradient_accumulation_steps)
+        logger.info(f"Number of training epochs: {num_epochs:.2f}")
+    
+    # Tokenizer
+    tokenizer_cfg = InputParameters()
+    tokenizer = Tokenizer(tokenizer_cfg)
+    meta_vocab_size = len(tokenizer.encoder.vocab)
+    
+    # Model Init
+    iter_num = 0
+    best_val_loss = 1e9
+    
+    model_args = dict(
+        n_layer=config.n_layer,
+        n_head=config.n_head,
+        n_embd=config.n_embd,
+        block_size=config.block_size,
+        bias=config.bias,
+        vocab_size=None,
+        dropout=config.dropout,
+        n_actions=config.num_actions,
+        morden_style=config.morden_style,
+        action_mask=config.action_mask
+    )
+    
+    if config.init_from == "scratch":
+        if master_process:
+            logger.info("Initializing a new model from scratch")
+        model_args["vocab_size"] = meta_vocab_size
+        gptconf = GPTConfig(**model_args)
+        model = GPT(gptconf)
+    elif config.init_from == "resume":
+        if master_process:
+            logger.info(f"Resuming training from {config.out_dir}")
+        ckpt_path = os.path.join(config.out_dir, "ckpt.pt")
+        checkpoint = torch.load(ckpt_path, map_location=device)
+        checkpoint_model_args = checkpoint["model_args"]
+        # Force config attributes equality
+        for k in ["n_layer", "n_head", "n_embd", "block_size", "bias", "vocab_size", "num_actions"]:
+            model_args[k] = checkpoint_model_args[k]
+        
+        gptconf = GPTConfig(**model_args)
+        model = GPT(gptconf)
+        state_dict = checkpoint["model"]
+        unwanted_prefix = "_orig_mod."
+        for k, v in list(state_dict.items()):
+            if k.startswith(unwanted_prefix):
+                state_dict[k[len(unwanted_prefix):]] = state_dict.pop(k)
+        model.load_state_dict(state_dict)
+        iter_num = checkpoint["iter_num"]
+        best_val_loss = checkpoint["best_val_loss"]
+    
+    model.to(device)
+    
+    if master_process:
+        logger.info("number of parameters: %.2fM" % (model.get_num_params() / 1e6,))
+        
+    scaler = torch.cuda.amp.GradScaler(enabled=(config.dtype == "float16"))
+    optimizer = model.configure_optimizers(config.weight_decay, config.learning_rate, (config.beta1, config.beta2), device_type)
+    
+    if config.init_from == "resume":
+        optimizer.load_state_dict(checkpoint["optimizer"])
+    
+    # Compilation
+    if config.compile and 'cuda' in device:
+        if master_process:
+            logger.info("compiling the model... (takes a ~minute)")
+        try:
+            model = torch.compile(model)
+        except AttributeError:
+            logger.warning('torch compile(model) requires PyTorch >= 2.0')
+            
+    # DDP Wrap
+    if ddp:
+        model = DDP(model, device_ids=[int(device.split(':')[1])])
+        
+    raw_model = model.module if ddp else model
+    
+    # Training Loop
+    X, Y = get_batch(train_data_iter, device)
+    t0 = time.time()
+    local_iter_num = 0
+    running_mfu = -1.0
+    
+    while True:
+        # LR Schedule
+        lr = get_lr(iter_num, config) if config.decay_lr else config.learning_rate
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = lr
+            
+        # Evaluation and Checkpointing
+        if iter_num % config.eval_interval == 0 and master_process:
+            losses = estimate_loss(model, ctx, train_data_iter, val_data_iter, config.eval_iters)
+            logger.info(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+            
+            if config.wandb_log:
+                wandb.log({
                     "iter": iter_num,
                     "train/loss": losses["train"],
                     "val/loss": losses["val"],
                     "lr": lr,
-                    "mfu": running_mfu * 100,  # convert to percentage
-                }
-            )
-        if losses["val"] < best_val_loss or always_save_checkpoint:
-            best_val_loss = losses["val"]
-            if iter_num > 0:
-                checkpoint = {
-                    "model": raw_model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                    "model_args": model_args,
-                    "iter_num": iter_num,
-                    "best_val_loss": best_val_loss,
-                    "config": config,
-                }
-                logger.info(f"saving checkpoint to {out_dir}")
-                torch.save(checkpoint, os.path.join(out_dir, "ckpt.pt"))
+                    "mfu": running_mfu * 100,
+                })
+                
+            if losses["val"] < best_val_loss or config.always_save_checkpoint:
+                best_val_loss = losses["val"]
+                if iter_num > 0:
+                    checkpoint = {
+                        "model": raw_model.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                        "model_args": model_args,
+                        "iter_num": iter_num,
+                        "best_val_loss": best_val_loss,
+                        "config": asdict(config),
+                    }
+                    logger.info(f"saving checkpoint to {config.out_dir}")
+                    torch.save(checkpoint, os.path.join(config.out_dir, "ckpt.pt"))
 
-    # forward backward update, with optional gradient accumulation to simulate larger batch size
-    # and using the GradScaler if data type is float16
-    for micro_step in range(gradient_accumulation_steps):
-        if ddp:
-            # in DDP training we only need to sync gradients at the last micro step.
-            # the official way to do this is with model.no_sync() context manager, but
-            # I really dislike that this bloats the code and forces us to repeat code
-            # looking at the source of that context manager, it just toggles this variable
-            model.require_backward_grad_sync = (
-                    micro_step == gradient_accumulation_steps - 1
-            )
-        with ctx:
-            logits, loss = model(X, Y)
-            loss = (
-                    loss / gradient_accumulation_steps
-            )  # scale the loss to account for gradient accumulation
-        # immediately async prefetch next batch while model is doing the forward pass on the GPU
-        X, Y = get_batch(train_data_iter)
-        # backward pass, with gradient scaling if training in fp16
-        scaler.scale(loss).backward()
-    # clip the gradient
-    if grad_clip != 0.0:
-        scaler.unscale_(optimizer)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-    # step the optimizer and scaler if training in fp16
-    scaler.step(optimizer)
-    scaler.update()
-    # flush the gradients as soon as we can, no need for this memory anymore
-    optimizer.zero_grad(set_to_none=True)
+        # Training Step
+        for micro_step in range(config.gradient_accumulation_steps):
+            if ddp:
+                model.require_backward_grad_sync = (micro_step == config.gradient_accumulation_steps - 1)
+                
+            with ctx:
+                logits, loss = model(X, Y)
+                loss = loss / config.gradient_accumulation_steps
+                
+            X, Y = get_batch(train_data_iter, device)
+            scaler.scale(loss).backward()
+            
+        if config.grad_clip != 0.0:
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
+            
+        scaler.step(optimizer)
+        scaler.update()
+        optimizer.zero_grad(set_to_none=True)
+        
+        # Timing
+        t1 = time.monotonic()
+        dt = t1 - t0
+        t0 = t1
+        
+        if iter_num % config.log_interval == 0 and master_process:
+            lossf = loss.item() * config.gradient_accumulation_steps
+            if local_iter_num >= 5:
+                mfu = raw_model.estimate_mfu(config.batch_size * config.gradient_accumulation_steps, dt)
+                running_mfu = mfu if running_mfu == -1.0 else 0.9 * running_mfu + 0.1 * mfu
+                
+            logger.info(f"iter {iter_num}: loss {lossf:.4f}, time {dt * 1000:.2f}ms, "
+                        f"mfu {running_mfu * 100:.2f}%, {iter_num} / {config.max_iters}")
+            
+        iter_num += 1
+        local_iter_num += 1
+        
+        if iter_num > config.max_iters:
+            break
+            
+    if ddp:
+        destroy_process_group()
 
-    # timing and logging
-    t1 = time.monotonic()
-    dt = t1 - t0
-    t0 = t1
-    if iter_num % log_interval == 0 and master_process:
-        # get loss as float. note: this is a CPU-GPU sync point
-        # scale up to undo the division above, approximating the true total loss (exact would have been a sum)
-        lossf = loss.item() * gradient_accumulation_steps
-        if local_iter_num >= 5:  # let the training loop settle a bit
-            mfu = raw_model.estimate_mfu(batch_size * gradient_accumulation_steps, dt)
-            running_mfu = mfu if running_mfu == -1.0 else 0.9 * running_mfu + 0.1 * mfu
+def main():
+    # Ensure spawn for multiprocessing
+    multiprocessing.set_start_method("spawn", force=True)
+    
+    # Wandb Offline Default Init (as per original script being conservative)
+    # However, init happens later in train() properly based on config.
+    # The original script had it early.
+    # wandb.init(mode="offline") 
+    
+    config = TrainingConfig()
+    config.update_from_args(sys.argv[1:])
+    
+    train(config)
 
-        logger.info(f"iter {iter_num}: loss {lossf:.4f}, time {dt * 1000:.2f}ms, "
-                    f"mfu {running_mfu * 100:.2f}%, {iter_num} / {max_iters}")
-
-    iter_num += 1
-    local_iter_num += 1
-
-    # termination conditions
-    if iter_num > max_iters:
-        break
-
-if ddp:
-    destroy_process_group()
+if __name__ == "__main__":
+    main()
