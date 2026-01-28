@@ -30,8 +30,11 @@ def main(disable_wandb=True):
 
 
     folder_names = [
-        "01-random",
-        # "02-mazes",
+        "01-random-CBS",
+        "02-mazes-CBS",
+        "03-warehouse-CBS",
+        "04-movingai-CBS",
+        "05-puzzles-CBS"
     ]
 
     for folder in folder_names:
@@ -50,39 +53,39 @@ def main(disable_wandb=True):
         eval_dir = BASE_PATH / folder
         
         # Unroll grid search
-        env_config = base_config.get('environment', {})
-        grid_params = {}
-        fixed_params = {}
+        # env_config = base_config.get('environment', {})
+        # grid_params = {}
+        # fixed_params = {}
         
-        for k, v in env_config.items():
-            if isinstance(v, dict) and 'grid_search' in v:
-                grid_params[k] = v['grid_search']
-            else:
-                fixed_params[k] = v
+        # for k, v in env_config.items():
+        #     if isinstance(v, dict) and 'grid_search' in v:
+        #         grid_params[k] = v['grid_search']
+        #     else:
+        #         fixed_params[k] = v
                 
-        keys = list(grid_params.keys())
-        values = list(grid_params.values())
+        # keys = list(grid_params.keys())
+        # values = list(grid_params.values())
         
-        combinations = list(itertools.product(*values))
-        total_runs = len(combinations)
-        print(f"Total experiments to run: {total_runs}")
+        # combinations = list(itertools.product(*values))
+        # total_runs = len(combinations)
+        # print(f"Total experiments to run: {total_runs}")
         
-        for i, combo in enumerate(combinations):
-            current_params = dict(zip(keys, combo))
-            print(f"\nRunning experiment {i+1}/{total_runs}: {current_params}")
+        # for i, combo in enumerate(combinations):
+        #     current_params = dict(zip(keys, combo))
+        #     print(f"\nRunning experiment {i+1}/{total_runs}: {current_params}")
             
-            # Create a specific config for this run
-            run_config = copy.deepcopy(base_config)
+        #     # Create a specific config for this run
+        #     run_config = copy.deepcopy(base_config)
             
-            # Replace grid_search with specific value
-            for k, v in current_params.items():
-                run_config['environment'][k] = v
+        #     # Replace grid_search with specific value
+        #     for k, v in current_params.items():
+        #         run_config['environment'][k] = v
                 
-            # Run evaluation
-            try:
-                evaluation(run_config, eval_dir=eval_dir)
-            except Exception as e:
-                print(f"Error in experiment {i+1}: {e}")
+        #     # Run evaluation
+        try:
+            evaluation(base_config, eval_dir=eval_dir)
+        except Exception as e:
+            print(f"Error in experiment {i+1}: {e}")
 
 if __name__ == "__main__":
     main()

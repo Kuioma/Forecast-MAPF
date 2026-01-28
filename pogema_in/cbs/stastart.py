@@ -118,14 +118,14 @@ class Planner:
             semi_dynamic_obstacles = dict()
         else:
             semi_dynamic_obstacles = dict((k, np.array(list(v))) for k, v in semi_dynamic_obstacles.items())
+            
         def safe_semi_dynamic(grid_pos: np.ndarray, time: int) -> bool: #检查终止障碍冲突
             nonlocal semi_dynamic_obstacles
+            pos_tuple = tuple(grid_pos)
             for timestamp, obstacles in semi_dynamic_obstacles.items():
-                flag = True
                 if time >= timestamp:
-                    flag = all((grid_pos != obstacle).any() for obstacle in obstacles)
-                if not flag:
-                    return False
+                    if pos_tuple in obstacles:
+                        return False
             return True
 
         start = np.array(start)
@@ -134,6 +134,7 @@ class Planner:
         s = State(start, 0, 0, self.h(start, goal))
 
         open_set = [s]
+        seen_in_open = {s} # Use set for O(1) lookup
         closed_set = set()
 
         # Keep track of parent nodes for reconstruction
@@ -142,26 +143,33 @@ class Planner:
         iter_ = 0
         while open_set and iter_ < max_iter:
             iter_ += 1
-            current_state = open_set[0]  # Smallest element in min-heap
+            current_state = heappop(open_set)
+            
             if current_state.pos_equal_to(goal):
                 if debug:
                     print('STA*: Path found after {0} iterations'.format(iter_))
                 return self.reconstruct_path(came_from, current_state)
 
-            closed_set.add(heappop(open_set))
+            closed_set.add(current_state)
             epoch = current_state.time + 1
+            
             for neighbour in self.neighbour_table.lookup(current_state.pos):
                 neighbour_state = State(neighbour, epoch, current_state.g_score + 1, self.h(neighbour, goal))
+                
                 # Check if visited
                 if neighbour_state in closed_set:
                     continue
+                
                 # Avoid obstacles
-                if not self.safe_static(neighbour) or not safe_dynamic(neighbour, epoch) or not safe_semi_dynamic(neighbour, epoch): 
+                if not self.safe_static(neighbour) or \
+                   not safe_dynamic(neighbour, epoch) or \
+                   not safe_semi_dynamic(neighbour, epoch): 
                     continue
 
                 # Add to open set
-                if neighbour_state not in open_set:
+                if neighbour_state not in seen_in_open:
                     came_from[neighbour_state] = current_state
+                    seen_in_open.add(neighbour_state)
                     heappush(open_set, neighbour_state)
 
         if debug:

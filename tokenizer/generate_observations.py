@@ -231,6 +231,8 @@ class ObservationGenerator:
         return new_grid
 
     def generate_agent_proximity(self, paths):
+        # 在给定所有智能体（agents）的移动路径（paths）后，计算并生成每个时刻（timestep）
+        # 每个智能体周围的其他智能体列表，并按距离排序。
         num_agents = len(paths)
         num_timesteps = len(paths[0])
         proximity_lists = [[] for _ in range(num_timesteps)]

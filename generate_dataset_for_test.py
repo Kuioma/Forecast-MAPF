@@ -23,7 +23,7 @@ from tokenizer.parameters import InputParameters
 
 EXPERT_DATA_FOLDER = "LaCAM_data"
 TEMP_FOLDER = "temp"
-DATASET_FOLDER = "dataset/1"
+DATASET_FOLDER = "dataset/radius6_action6"
 CONFIGS = [
     # "dataset_configs/10-medium-mazes/temp.yaml",
     # "dataset_configs/12-medium-random/temp.yaml",
@@ -177,9 +177,9 @@ def process_files(maze_files, random_files, output_file,n_actions=6):
     random_results = []
     maze_files = maze_files[:10]
     random_files = random_files[:10]
-    # for i in maze_files:
-    #     maze_results.append(process_file(file=i,maps=maps_mazes))
-    #     break
+    for i in maze_files:
+        maze_results.append(process_file(file=i,maps=maps_mazes))
+        break
 
     for i in random_files:
         random_results.append(process_file(file=i,maps=maps_random))
@@ -307,7 +307,7 @@ def main():
     # run_expert()
 
     # Step 2: Load one (or mutiple) big json file and split it (them) into small ones (1 map = 1 json).
-    files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
+    # files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
     # with mp.Pool() as pool:
     #     pool.map(split_json, files)
     # print(files)
@@ -317,7 +317,7 @@ def main():
     generate_chunks()
     
     #Step 4: clear temp folder
-    shutil.rmtree(TEMP_FOLDER)
+    # shutil.rmtree(TEMP_FOLDER)
 
 if __name__ == "__main__":
     main()

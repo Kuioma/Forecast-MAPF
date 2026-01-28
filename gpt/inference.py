@@ -10,6 +10,7 @@ from pydantic import Extra
 
 from gpt.model_multi_action import GPT, GPTConfig
 from tokenizer import cost2go
+from tokenizer import cost2go_py    
 from tokenizer.tokenizer import Encoder, InputParameters
 
 
@@ -152,7 +153,7 @@ class MAPFGPTInference:
             inputs.append(
                 {
                     "agents": agents_info,
-                    "cost2go": cost2go.generate_cost2go_obs(
+                    "cost2go": cost2go_py.generate_cost2go_obs(
                         self.cost2go_data[obs["global_target_xy"]],
                         obs["global_xy"],
                         self.cfg.cost2go_radius,
@@ -169,7 +170,7 @@ class MAPFGPTInference:
         moves = {(0, 0): "w", (-1, 0): "u", (1, 0): "d", (0, -1): "l", (0, 1): "r"}
         if self.cost2go_data is None:
             global_obs = observations[0]["global_obstacles"].copy().astype(int).tolist()
-            self.cost2go_data = cost2go.precompute_cost2go(
+            self.cost2go_data = cost2go_py.precompute_cost2go(
                 global_obs, self.cfg.cost2go_radius
             )
             self.actions_history = [["n" for _ in range(self.cfg.num_previous_actions)] for _ in range(num_agents)]
@@ -196,3 +197,4 @@ class MAPFGPTInference:
         self.cost2go_data = None
         self.actions_history = None
         self.position_history = None
+        self.net.reset_states()

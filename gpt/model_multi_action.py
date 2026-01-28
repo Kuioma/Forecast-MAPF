@@ -441,3 +441,6 @@ class GPT(nn.Module):
         else:
             _, idx_next = torch.topk(probs, k=1, dim=-1)
         return idx_next.squeeze()
+
+    def reset_states(self):
+        self.agent_actions = None

@@ -10,7 +10,7 @@ environment:
     grid_search: [8, 16 ,24, 32, 48, 64]
   map_name:
     grid_search:
-        [
+      [
         validation-random-seed-000,
         validation-random-seed-001,
         validation-random-seed-002,
@@ -42,22 +42,6 @@ environment:
         validation-random-seed-028,
         validation-random-seed-029,
         validation-random-seed-030,
-        # validation-random-seed-031,
-        # validation-random-seed-032,
-        # validation-random-seed-033,
-        # validation-random-seed-034,
-        # validation-random-seed-035,
-        # validation-random-seed-036,
-        # validation-random-seed-037,
-        # validation-random-seed-038,
-        # validation-random-seed-039,
-        # validation-random-seed-040,
-        # validation-random-seed-041,
-        # validation-random-seed-042,
-        # validation-random-seed-043,
-        # validation-random-seed-044,
-        # validation-random-seed-045,
-        # validation-random-seed-046,
         # validation-random-seed-047,
         # validation-random-seed-048,
         # validation-random-seed-049,
@@ -140,7 +124,6 @@ environment:
         # validation-random-seed-126,
         # validation-random-seed-127,
       ]
-      
 
 algorithms:
   # MAPF-GPT-2M:

@@ -22,9 +22,9 @@ from lacam.inference import LacamInference, LacamInferenceConfig
 from tokenizer.generate_observations import ObservationGenerator
 from tokenizer.parameters import InputParameters
 
-EXPERT_DATA_FOLDER = "LaCAM_data"
+EXPERT_DATA_FOLDER = "/home/shijunjie/kuioma_ws/Forecast-MAPF/LaCAM_data"
 TEMP_FOLDER = "temp"
-DATASET_FOLDER = "dataset/input_real_action"
+DATASET_FOLDER = "dataset/radius5_action5"
 CONFIGS = [
     # "dataset_configs/10-medium-mazes/temp.yaml",
     # "dataset_configs/12-medium-random/temp.yaml",
@@ -32,26 +32,33 @@ CONFIGS = [
     # "dataset_configs/10-medium-mazes/temp_1.yaml",
     # "dataset_configs/10-medium-mazes/temp_2.yaml",
     # "dataset_configs/10-medium-mazes/temp_3.yaml",
-    "dataset_configs/10-medium-mazes/10-medium-mazes-part1.yaml",
-    "dataset_configs/10-medium-mazes/10-medium-mazes-part2.yaml",
-    "dataset_configs/10-medium-mazes/10-medium-mazes-part3.yaml",
-    "dataset_configs/10-medium-mazes/10-medium-mazes-part4.yaml",
-    "dataset_configs/12-medium-random/temp.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-maze-part1.yaml",
+    "dataset_configs/10-medium-mazes/10-medium-maze-part2.yaml",
+    # "dataset_configs/10-medium-mazes/10-medium-mazes-part3.yaml",
+    # "dataset_configs/10-medium-mazes/10-medium-mazes-part4.yaml",
+    # "dataset_configs/12-medium-random/temp.yaml",
     #"dataset_configs/12-medium-random/12-medium-random-part1.yaml",
+    "dataset_configs/12-medium-random/12-medium-random-part2.yaml",
+    "dataset_configs/12-medium-random/12-medium-random-part3.yaml",
 ]
 
 RANDOM_MAPS_FOLDER = "dataset_configs/12-medium-random"
 MAZES_MAPS_FOLDER = "dataset_configs/10-medium-mazes"
 
-NUM_CHUNKS = 50
-FILE_PER_CHUNK = 10
+NUM_CHUNKS = 5
+FILE_PER_CHUNK = 25
 DESIRED_SIZE = 10*2**21 # per chunk
 MAZE_RATIO = 0.9
 NUM_PROCESSES = 50
-AGENT_RADIUS = 6
-COST2GO_RADIUS = 6
-NUM_ACTIONS = 6
+ORIGIN_RADIUS = 5
+AGENT_RADIUS = 5
+COST2GO_RADIUS = 5
+NUM_ACTIONS = 5
 CONTEXT_SIZE = 256
+def radius_token_addition(start,end):
+    result = (2*end+1)*(2*end+1)-(2*start+1)*(2*start+1)
+    return result
+CONTEXT_SIZE = CONTEXT_SIZE+radius_token_addition(ORIGIN_RADIUS,AGENT_RADIUS)
 
 def tensor_to_hash(tensor):
     tensor_bytes = tensor.tobytes()
@@ -69,14 +76,9 @@ def get_files_by_type(folder_path):
 def generate_part(map_name, maps):
     print("processing map", map_name)
     cfg = InputParameters()
-    def radius_token_addition(start,end):
-        result = (2*end+1)*(2*end+1)-(2*start+1)*(2*start+1)
-        return result
-    cfg.context_size = cfg.context_size+radius_token_addition(cfg.agents_radius,AGENT_RADIUS)
-    global CONTEXT_SIZE 
-    CONTEXT_SIZE = cfg.context_size
     cfg.agents_radius = AGENT_RADIUS
     cfg.cost2go_radius = COST2GO_RADIUS
+    cfg.context_size = CONTEXT_SIZE
     with open(map_name, "r") as f:
         data = json.load(f)
     generator = ObservationGenerator(maps, data, cfg)
@@ -296,12 +298,12 @@ def generate_chunks():
         
 def main():
     # Step 1: Run LaCAM to obtain expert data in json format.
-    run_expert()
+    # run_expert()
 
     # Step 2: Load one (or mutiple) big json file and split it (them) into small ones (1 map = 1 json).
-    files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
-    with mp.Pool() as pool:
-        pool.map(split_json, files)
+    # files = [f"{EXPERT_DATA_FOLDER}/{config[:-5]}/LaCAM.json" for config in CONFIGS]
+    # with mp.Pool() as pool:
+    #     pool.map(split_json, files)
     # split_json(files[0])
     
     # Step 3: Generate dataset with chunk files.

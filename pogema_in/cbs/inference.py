@@ -1,6 +1,7 @@
 from typing import Literal
 from pogema_toolbox.algorithm_config import AlgoBase
 import numpy as np
+from sympy import false
 from .CBS import CBS
 
 class CBSInferenceConfig(AlgoBase):
@@ -11,12 +12,17 @@ class CBSInference:
         self.cfg = cfg
         self.planned_paths = {} 
         self.step_idx = 0
+        self.not_find = False
 
     def act(self, observations):
         # Plan if not already done for this episode
-        if not self.planned_paths:
+        if not self.planned_paths and not self.not_find:
             self.plan(observations)
-        
+            self.not_find = True
+        # 找不到路
+        if not self.planned_paths:
+            return [0] * len(observations)
+
         actions = []
         # Mapping from coordinate difference to action index
         # [0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]
@@ -75,7 +81,7 @@ class CBSInference:
             
         planner = CBS(cbs_grid, need_convert=False)
         # Using a reasonable iteration limit for benchmark
-        result = planner.plan(positions, max_iterations=5000)
+        result = planner.plan(positions, max_iterations=500)
         
         if result and result.sol:
             self.planned_paths = result.sol
@@ -86,3 +92,4 @@ class CBSInference:
     def reset_states(self):
         self.planned_paths = {}
         self.step_idx = 0
+        self.not_find = False

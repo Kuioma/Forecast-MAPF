@@ -29,18 +29,18 @@ def main(disable_wandb=True):
         "MAPF-GPT", MAPFGPTInference, MAPFGPTInferenceConfig
     )
     
-    from pogema_in.cbs.inference import CBSInference, CBSInferenceConfig
-    ToolboxRegistry.register_algorithm("CBS", CBSInference, CBSInferenceConfig)
-    # ToolboxRegistry.register_algorithm('SCRIMP', SCRIMPInference, SCRIMPInferenceConfig)
-    # ToolboxRegistry.register_algorithm('Follower', FollowerInference, FollowerInferenceConfig, follower_preprocessor)
+    # from pogema_in.cbs.inference import CBSInference, CBSInferenceConfig
+    # ToolboxRegistry.register_algorithm("CBS", CBSInference, CBSInferenceConfig)
+    # # ToolboxRegistry.register_algorithm('SCRIMP', SCRIMPInference, SCRIMPInferenceConfig)
+    # # ToolboxRegistry.register_algorithm('Follower', FollowerInference, FollowerInferenceConfig, follower_preprocessor)
 
 
     folder_names = [
-        "01-random",
-        "02-mazes",
-        "03-warehouse",
-        "04-movingai",
-        "05-puzzles",
+        "01-random_small",
+        # "02-mazes",
+        # "03-warehouse",
+        # "04-movingai",
+        # "05-puzzles",
     ]
 
     for folder in folder_names:

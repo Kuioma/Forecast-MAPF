@@ -34,7 +34,7 @@ from tokenizer.tokenizer import Tokenizer
 @dataclass
 class TrainingConfig:
     # I/O
-    out_dir: str = "four_action/21/6m"
+    out_dir: str = "output/radius6_action4_6m"
     eval_interval: int = 500
     log_interval: int = 1
     eval_iters: int = 5
@@ -43,7 +43,7 @@ class TrainingConfig:
     
     # wandb logging
     wandb_log: bool = True
-    wandb_project: str = "mapf-gpt-multi-action"
+    wandb_project: str = "forecast-mapf"
     
     # Training Loop
     gradient_accumulation_steps: int = 16
@@ -57,7 +57,7 @@ class TrainingConfig:
     dropout: float = 0.0
     bias: bool = False
     morden_style: bool = True
-    action_mask: bool = True
+    action_mask: bool = False
     
     # Optimizer
     learning_rate: float = 6e-4
@@ -83,8 +83,8 @@ class TrainingConfig:
     
     # Multi-action settings
     num_actions: int = 4
-    train_data_file: str = "dataset/1"
-    valid_data_file: str = "dataset/1"
+    train_data_file: str = "dataset/radius6_action6"
+    valid_data_file: str = "dataset/radius6_eval"
     
     def update_from_args(self, args: list[str]):
         """

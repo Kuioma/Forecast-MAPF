@@ -35,26 +35,33 @@ class constraint:
 
 
 class NTnode:
-    def __init__(self,con,sol,terminate_obstacle={},cost=0) -> None:
-        self.con = con  ###约束--- [constraint]
-        self.sol = sol  ###解 {id: sol}
+    def __init__(self, con, sol, terminate_obstacle={}, cost=0, num_conflicts=0) -> None:
+        self.con = con  ### 约束--- [constraint]
+        self.sol = sol  ### 解 {id: sol}
         self.cost = cost
-        self.terminate_obstacle = terminate_obstacle  ###agentid: time position
-        for key,value in sol.items():
-            self.cost += len(value)
+        self.num_conflicts = num_conflicts
+        self.terminate_obstacle = terminate_obstacle
+        if cost == 0:
+            for value in sol.values():
+                self.cost += len(value)
         
-    def __lt__(self,other):
-        return self.cost < other.cost
+    def __lt__(self, other):
+        # Tie-breaking: Use number of conflicts as secondary priority
+        if self.cost != other.cost:
+            return self.cost < other.cost
+        return self.num_conflicts < other.num_conflicts
+
     def __str__(self) -> str:
-        return "constraint:"+str(self.con)+"solution:"+str(self.sol)+"cost:"+str(self.cost)
-    def sol_add(self,sol,agent_id):
+        return f"constraint: {len(self.con)} items, cost: {self.cost}, conflicts: {self.num_conflicts}"
+
+    def sol_add(self, sol, agent_id):
         sol_dict = self.sol.copy()
         sol_dict[agent_id] = sol
         return sol_dict
 
 class CBS:
-    def __init__(self,world_state,need_convert = False,converter = None,world_dir = None) -> None:
-        self.planner = stastart.Planner(world_state,world_dir=world_dir)
+    def __init__(self, world_state, need_convert=False, converter=None, world_dir=None) -> None:
+        self.planner = stastart.Planner(world_state, world_dir=world_dir)
         self.time = 0
         self.need_convert = need_convert
         if need_convert:
@@ -71,127 +78,116 @@ class CBS:
         self.OpenList = []
         sol = {}
         _time = 0
-        cost = 0
         new_terminate_obstacle = {}
-        #        self.con_dict[self.agent_id] = {self.time:[tuple(self.position)]}
 
         # 未分配到任务的agent不动视为障碍
         # new_terminate_obstacle = {time:pos}
         if self.need_convert:
-            for key,value in position.items():
+            for key, value in position.items():
                 position[key] = self.converter.world_to_grid(value)
-        for id,pos in position.items():
-            if pos[1] == None:
-                new_terminate_obstacle[id] = (0,pos[0])
-        for agentID,pos in position.items():
-            agentPos = pos[0]
-            taskPos = pos[1]
-            if taskPos == None:
-                continue
-            result = {agentID:self.planner.plan(agentPos,taskPos,{},dict_to(new_terminate_obstacle,None))}
-            sol.update(result)
-            if len(result)!=0:             ### 达到终点后视为障碍
-                new_terminate_obstacle[agentID] = (len(result[agentID]),taskPos)
-        heapq.heappush(self.OpenList,NTnode({},sol,new_terminate_obstacle))
-        while(self.OpenList):
+        
+        for id, pos in position.items():
+            if pos[1] is None:
+                new_terminate_obstacle[id] = (0, pos[0])
+        
+        for agentID, pos in position.items():
+            if pos[1] is None: continue
+            result = self.planner.plan(pos[0], pos[1], {}, dict_to(new_terminate_obstacle, None))
+            if len(result) == 0: continue
+            sol[agentID] = result
+            new_terminate_obstacle[agentID] = (len(result), pos[1])
+            
+        initial_conflicts = detect_conflicts(NTnode({}, sol, new_terminate_obstacle))
+        heapq.heappush(self.OpenList, NTnode({}, sol, new_terminate_obstacle, num_conflicts=len(initial_conflicts)))
+        
+        while self.OpenList:
             _time += 1
-            if _time%50==0:print("time:",_time)
-            if(_time>max_iterations):
-                return None
+            if _time % 50 == 0: print("High-level Iteration:", _time)
+            if _time > max_iterations: return None
+            
             current = heapq.heappop(self.OpenList)
-            conflict = detect_conflicts(current)
-            # 无冲突则返回
-            if(conflict == []):
-                if(all(len(i)>0 for i in current.sol.values())):
+            conflicts = detect_conflicts(current)
+            
+            if not conflicts:
+                if all(len(i) > 0 for i in current.sol.values()):
                     if self.need_convert:
-                        print(current)
-                        for key,value in current.sol.items():
+                        for key, value in current.sol.items():
                             current.sol[key] = self.converter.grid_to_world(value)
                     return current
-            conflict_dict = defaultdict(list)
-            # ((x,y,t),agent)
-            for i in conflict:
-                for agent in i[1]:
-                    conflict_dict[agent].append(i[0])
-            ###生成新的节点
-            for agent,value in conflict_dict.items():
-                ###之前的约束加上现在的约束
-                pos_x,pos_y,time = value[0]
-                new_constraint = constraint(agent,time,[pos_x,pos_y])+current.con
-                new_result = self.planner.plan(position[agent][0],position[agent][1],new_constraint.con_dict[agent],dict_to(current.terminate_obstacle,agent))
-                new_terminate_obstacle = current.terminate_obstacle.copy()
-                if len(new_result)!=0:
-                    new_terminate_obstacle[agent] = (len(new_result),position[agent][1])
-                new_result = current.sol_add(new_result,agent)
-                heapq.heappush(self.OpenList,NTnode(new_constraint,new_result,new_terminate_obstacle))
+            
+            # Standard CBS branches on ONE conflict to keep the tree manageable
+            collision_loc, agents = conflicts[0]
+            for agent in agents:
+                pos_x, pos_y, time = collision_loc
+                new_con_obj = constraint(agent, time, [pos_x, pos_y]) + current.con
+                
+                new_path = self.planner.plan(position[agent][0], position[agent][1], 
+                                            new_con_obj.con_dict[agent], 
+                                            dict_to(current.terminate_obstacle, agent))
+                
+                if len(new_path) > 0:
+                    new_sol = current.sol_add(new_path, agent)
+                    new_term = current.terminate_obstacle.copy()
+                    new_term[agent] = (len(new_path), position[agent][1])
+                    
+                    # Calculate conflicts for tie-breaking
+                    temp_node = NTnode(new_con_obj, new_sol, new_term)
+                    num_c = len(detect_conflicts(temp_node))
+                    heapq.heappush(self.OpenList, NTnode(new_con_obj, new_sol, new_term, num_conflicts=num_c))
 
-
-def dict_to(dict,agent):
-    """
-     Convert the terminate_obstacle dictionary to a new format excluding the specified agent.
- 
-     Parameters:
-     dict (defaultdict): The dictionary containing agent termination obstacles.
-     agent (int): The ID of the agent to exclude from the new dictionary.
- 
-     Returns:
-     defaultdict: A new dictionary with the same structure, excluding the specified agent.
-    """
+def dict_to(d, agent):
     new_dict = defaultdict(set)
-    ###不能带自己的否则当新解路径长过原本解的时候必定无解
-    for key,value in dict.items():
+    for key, value in d.items():
         if key != agent:
-            new_dict[value[0]].add(value[1])
+            new_dict[value[0]].add(tuple(value[1]))
     return new_dict
 
 
 ### return ((loc_x,loc_y,time),[agent1....])
 def detect_conflicts(node):
-    conflict = []
+    if not node.sol: return []
     max_len = max(len(p) for p in node.sol.values())
+    
+    # Pre-process terminate obstacles
+    term_pos_map = defaultdict(list) # coord -> [(time_start, agent_id)]
+    for a_id, (t_start, pos) in node.terminate_obstacle.items():
+        term_pos_map[tuple(pos)].append((t_start, a_id))
 
-    past = {}
-    ### 碰撞冲突检测
+    past_pos = {} # agent_id -> pos_tuple
     for t in range(max_len):
-        temp = {}
-        locations = defaultdict(list)  ###（x,y,t）:(agentid)
-        for i,path in node.sol.items():
-            if len(path)>t:
-                temp.update({i:(path[t][0],path[t][1])})
-                #temp.append((i,(path[t][0],path[t][1])))
+        current_pos = {}
+        pos_to_agents = defaultdict(list)
+        
+        for i, path in node.sol.items():
+            if t < len(path):
+                p = tuple(path[t])
+                current_pos[i] = p
+                pos_to_agents[p].append(i)
+                
+                # 1. Vertex-Terminate Conflict
+                if p in term_pos_map:
+                    for t_start, other_ids in term_pos_map[p]:
+                        if t >= t_start and i != other_ids:
+                            return [((p[0], p[1], t), [i, other_ids])]
+                
+                # 2. Swap Conflict (O(N) lookup)
+                if i in past_pos:
+                    prev_i = past_pos[i]
+                    # If someone else is now at my previous, and I am now at their previous
+                    for other_i, now_p in current_pos.items():
+                        if other_i != i and now_p == prev_i:
+                            if past_pos.get(other_i) == p:
+                                return [((p[0], p[1], t), [i, other_i])]
             else:
-                temp.update({i:(-1,-1)})
-                #temp.append((i,(-1,-1)))
-
-            if len(path)>t:
-                locations[(path[t][0],path[t][1],t)].append(i) ###i agent
-                ###检查终止障碍
-                for agent,value in node.terminate_obstacle.items():            ###agentid: time positio
-                    if t>=value[0] and tuple(value[1])==(path[t][0],path[t][1]):
-                            ###有终止冲突
-                            locations[(value[1][0],value[1][1],t)].append(i)
-        ### 交换冲突
-        swap_index = detect_swap(past, temp)
-        for i,j in swap_index:
-            conflict.append(((temp[i][0],temp[i][1],t),[i]))
-        past = temp
-        ### 碰撞冲突
-        for loc,agent in locations.items():
-            if len(agent)>1:   ###
-                conflict.append((loc,agent))  ###loc_x,loc_y,time,agent
-    return conflict
-
-def detect_swap(past, now):
-    swap_indices = []
-    for i, (p1, p2) in past.items():
-        for j, (n1, n2) in now.items():
-            if(p1,p2) == (-1,-1) or (n1,n2) == (-1,-1):
-                continue
-            if (p1, p2) == (n1, n2) and past[j] == now[i]:
-                if i != j:
-                    swap_indices.append((i, j))
-    swap_indices = list(set(swap_indices))
-    return swap_indices
+                current_pos[i] = None
+        
+        # 3. Vertex-Vertex Conflict
+        for pos, agents in pos_to_agents.items():
+            if len(agents) > 1:
+                return [((pos[0], pos[1], t), agents)]
+        
+        past_pos = current_pos
+    return []
 
 
 class Converter:
