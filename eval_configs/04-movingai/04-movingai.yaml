@@ -143,7 +143,7 @@ environment:
 
 algorithms:
   Forecast-MAPF:
-    name: MAPF-GPT
+    name: Forecast-MAPF
     parallel_backend: balanced_dask
     num_process: 3
     path_to_weights: ./output/radius5_action3_nomorden_6m/ckpt.pt

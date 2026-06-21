@@ -51,4 +51,4 @@ def repair_all_json_files(folder_path):
         except Exception as e:
             print(f"❌ Failed to repair {fp}: {e}")
 
-repair_all_json_files("/home/mapf-gpt/temp")
+repair_all_json_files("temp")

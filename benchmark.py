@@ -8,7 +8,7 @@ from pogema_toolbox.evaluator import evaluation
 from pogema_toolbox.registry import ToolboxRegistry
 
 from create_env import create_eval_env
-from gpt.inference import MAPFGPTInference, MAPFGPTInferenceConfig
+from gpt.inference import ForecastMAPFInference, ForecastMAPFInferenceConfig
 from lacam.inference import LacamInference, LacamInferenceConfig
 
 PROJECT_NAME = "Benchmark"
@@ -24,7 +24,7 @@ def main(disable_wandb=True):
     env_cfg_name = "Environment"
     ToolboxRegistry.register_env(env_cfg_name, create_eval_env, Environment)
     ToolboxRegistry.register_algorithm(
-        "MAPF-GPT", MAPFGPTInference, MAPFGPTInferenceConfig
+        "Forecast-MAPF", ForecastMAPFInference, ForecastMAPFInferenceConfig
     )
     ToolboxRegistry.register_algorithm(
         "LaCAM", LacamInference, LacamInferenceConfig

@@ -14,8 +14,8 @@ from tokenizer import cost2go_py
 from tokenizer.tokenizer import Encoder, InputParameters
 
 
-class MAPFGPTInferenceConfig(AlgoBase, extra=Extra.forbid):
-    name: Literal["MAPF-GPT"] = "MAPF-GPT"
+class ForecastMAPFInferenceConfig(AlgoBase, extra=Extra.forbid):
+    name: Literal["Forecast-MAPF"] = "Forecast-MAPF"
     num_agents: int = 13
     num_previous_actions: int = 5
     cost2go_value_limit: int = 20
@@ -47,9 +47,9 @@ def strip_prefix_from_state_dict(state_dict, prefix="_orig_mod."):
     return new_state_dict
 
 
-class MAPFGPTInference:
-    def __init__(self, cfg: MAPFGPTInferenceConfig, net=None):
-        self.cfg: MAPFGPTInferenceConfig = cfg
+class ForecastMAPFInference:
+    def __init__(self, cfg: ForecastMAPFInferenceConfig, net=None):
+        self.cfg: ForecastMAPFInferenceConfig = cfg
         self.predict_next_action = cfg.predict_next_action
         self.cost2go_data = None
         self.actions_history = None

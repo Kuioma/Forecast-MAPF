@@ -1,1 +1,1 @@
-docker build -t mapf-gpt .
+docker build -t forecast-mapf .

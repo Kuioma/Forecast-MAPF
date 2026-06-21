@@ -19,7 +19,7 @@ wandb.init(mode="offline")
 from loguru import logger
 
 # Add project root to path
-sys.path.append("/home/mapf-gpt")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Internal imports
 from gpt.fast_data_loader import MapfArrowDatasetMultiAction

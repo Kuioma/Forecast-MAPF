@@ -146,7 +146,7 @@ class MapfArrowDatasetMultiAction(MapfArrowDataset):
 
 def main():
     # folder_path = "../dataset/validation"
-    folder_path = "/home/mapf-gpt/dataset/train"
+    folder_path = "dataset/train"
     # dataset = MapfArrowDataset(folder_path, device='cuda:0', batch_size=32)
     dataset = MapfArrowDatasetMultiAction(folder_path, device='cpu', batch_size=32,action_n=5)
 

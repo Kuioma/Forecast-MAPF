@@ -8,9 +8,7 @@ from pogema_toolbox.evaluator import run_episode
 from pogema_toolbox.registry import ToolboxRegistry
 
 from create_env import create_eval_env
-from gpt.inference import MAPFGPTInference, MAPFGPTInferenceConfig
-from gpt.inference_multi_action import MultiActionGPTInference,MultiActionMAPFGPTInferenceConfig
-
+from gpt.inference import ForecastMAPFInference, ForecastMAPFInferenceConfig
 
 def main():
     parser = argparse.ArgumentParser(description='MAPF-GPT Inference Script')
@@ -21,10 +19,8 @@ def main():
     parser.add_argument('--device', type=str, default='cuda', help='Device to use: cuda, cpu, mps (default: %(default)s)')
     parser.add_argument('--max_episode_steps', type=int, default=128,
                         help='Maximum episode steps (default: %(default)d)')
-    parser.add_argument('--show_map_names', default=False,action='store_true', help='Shows names of all available maps')
+    parser.add_argument('--show_map_names', action='store_true', help='Shows names of all available maps')
 
-    parser.add_argument('--model', type=str, choices=['2m', '6M', '85m'], default='2m',
-                        help='Model to use: 2M, 6M, 85M (default: %(default)s)')
 
     # loading maps from eval folders
     for maps_file in Path("eval_configs_").rglob('maps.yaml'):
@@ -38,7 +34,8 @@ def main():
         for map_ in ToolboxRegistry.get_maps():
             print(map_)
         return
-
+    args.map_name = "puzzle-15"
+    args.num_agents = 4
     env_cfg = Environment(
         with_animation=args.animation,
         observation_type="MAPF",
@@ -52,20 +49,16 @@ def main():
     )
 
     # pytorch seeding
-    # torch_seed = 42
-    # torch.manual_seed(torch_seed)
-    # if torch.cuda.is_available():
-    #     torch.cuda.manual_seed(torch_seed)
-    # torch.backends.mps.is_available()
-    # torch.backends.cudnn.deterministic = True
-    from pogema_in.cbs.inference import CBSInference, CBSInferenceConfig
-    algo = CBSInference(CBSInferenceConfig())
+    torch_seed = 1
+    torch.manual_seed(torch_seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(torch_seed)
+    torch.backends.mps.is_available()
+    torch.backends.cudnn.deterministic = True
+
     env = create_eval_env(env_cfg)
-    # algo = MAPFGPTInference(MAPFGPTInferenceConfig(path_to_weights=f'weights/model-85m.pt', device=args.device))
-    # algo = MultiActionGPTInference(MultiActionMAPFGPTInferenceConfig(path_to_weights=f'weights/80m/ckpt.pt', device=args.device))
-
-
-    # algo = MAPFGPTInference(MAPFGPTInferenceConfig(path_to_weights=f'weights/model-{args.model}.pt', device=args.device))
+    algo = ForecastMAPFInference(ForecastMAPFInferenceConfig(path_to_weights=f'weights/6m/ckpt.pt', device=args.device,predict_next_action=True))
+    args.model = "Forecast-MAPF(6m)"
     algo.reset_states()
     results = run_episode(env, algo)
 
