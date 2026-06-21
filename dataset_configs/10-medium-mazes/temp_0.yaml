@@ -1,0 +1,43 @@
+environment:
+  name: Environment
+  with_animation: False
+  on_target: nothing
+  max_episode_steps: 128
+  observation_type: MAPF
+  collision_system: soft
+  seed:
+    grid_search:
+      [
+        0,
+        # 1,
+      ]
+  num_agents:
+    grid_search: [16, 24, 32]
+  map_name:
+    grid_search:
+      [
+        medium-mazes-seed-0000,
+        medium-mazes-seed-0001,
+        medium-mazes-seed-0002,
+        medium-mazes-seed-0003,
+        medium-mazes-seed-0004,
+        medium-mazes-seed-0005,
+        medium-mazes-seed-0006,
+        medium-mazes-seed-0007,
+        medium-mazes-seed-0008,
+        medium-mazes-seed-0009,
+        medium-mazes-seed-0010,
+      ]
+algorithms:
+  LaCAM:
+    name: LaCAM
+    time_limit: 10
+    timeouts: [10]
+    num_process: 30
+    parallel_backend: sequential
+
+results_views:
+  TabularView1:
+    type: tabular
+    drop_keys: [seed, map_name]
+    print_results: True

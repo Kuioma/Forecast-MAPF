@@ -1,0 +1,38 @@
+environment:
+  name: Environment
+  with_animation: False
+  on_target: nothing
+  max_episode_steps: 128
+  observation_type: MAPF
+  collision_system: soft
+  seed:
+    grid_search:
+      [
+        0,
+        # 1,
+      ]
+  num_agents:
+    grid_search: [16, 24, 32]
+  map_name:
+    grid_search:
+      [
+      training-random-seed-00640,   
+      training-random-seed-00641, 
+      training-random-seed-00642, 
+      training-random-seed-00643
+      ]
+algorithms:
+  LaCAM:
+    name: LaCAM
+    time_limit: 10
+    timeouts: [10]
+    num_process: 30
+    parallel_backend: sequential
+
+results_views:
+  TabularView1:
+    type: tabular
+    drop_keys: [seed, map_name]
+    print_results: True
+
+
